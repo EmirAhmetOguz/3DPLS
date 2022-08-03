@@ -1,0 +1,294 @@
+<<The 3-Dimensional Probabilistic Landslide Susceptibility (3DPLS) model:>>
+3DPLS version 1.0 (August 2022)
+
+The 3-Dimensional Probabilistic Landslide Susceptibility (3DPLS) model is a Python code developed for landslide susceptibility assessment (see Oguz et al. 2022*). The 3DPLS model evaluates the landslide susceptibility on a local to a regional scale (i.e., single slope to 10 km2) and allows for the effects of variability of the model parameter on slope stability to be accounted for. 
+The 3DPLS model couples the hydrological and slope stability models. The hydrological model calculates the transient pore pressure changes due to rainfall infiltration using Iverson’s linearized solution of the Richards equation assuming tension saturation. The slope stability model calculates the factor of safety (FS) by utilizing the extension of Bishop’s simplified method of slope stability analysis to three dimensions. The 3DPLS model requires topographic data (e.g., DEM, slope, aspect, groundwater depth, depth to bedrock, geological zones), hydrological parameters (e.g., steady background infiltration rate, permeability coefficient, diffusivity), geotechnical parameters (e.g., soil unit weight, cohesion, friction angle), and rainfall data.
+The model has a grid containing hundreds or thousands of cells depending on the problem size and refinement. The smallest unit of the grid is called a grid cell having its own model parameters. The developed model calculates the FS of an ellipsoidal sliding surface consisting of grid cells over a discretized problem domain. The model generates a large number of ellipsoidal sliding surfaces centered at each grid cell over the terrain and calculates the FS of all sliding surfaces. After the calculation, each cell is involved in several ellipsoidal sliding surfaces with different FS values. Among all FS values, the minimum FS representing the critical ellipsoidal sliding surface is assigned to each cell. Each simulation results in a FS map over the terrain. After a number simulation, the 3DPLS model provides the FS map of each simulation, the mean FS, µ(FS), map and the probability of failure, Pf, map.
+The current version of the 3DPLS model can consider multiple soil types over the study area, and account for the spatial variability, i.e., heterogeneity, of the geotechnical and hydrological model parameters. All the cells over the study area should have data as the model does not support cases where there exist cells with no data. The main code can be changed based on the problem, but the function code should be kept as it is.
+
+For your questions and cooperation, 
+
+Emir Ahmet OGUZ
+e-mail: emirahmetoguz@gmail.com 
+
+*Oguz, E.A., Depina, I. & Thakur, V. Effects of soil heterogeneity on susceptibility of shallow landslides. Landslides 19, 67–83 (2022). https://doi.org/10.1007/s10346-021-01738-x
+
+
+
+<<Input parameters for the example problems: >>
+
+There are 3 validation problems to validate the slope stability model of the 3DPLS. In addition to validation problems, 2 example problems (simplified case problem and case study problem given in Oguz et al. 2022*) are provided in the “InputData” folder. 
+For validation problems and simplified case problems, few modifications are implemented in addition to the 3DPLS model. The code will do the modifications automatically when the parameter, "ProblemName", is defined as one of {'Pr1', 'Pr2','Pr3S1Dry','Pr3S2Dry','Pr3S2Wet' 'SimpCase'}. These modifications are explained below for each example problem.
+The following sections show the required changes in the main code for each example individually. When the changes are done, the code can be run to reproduce the results in Oguz et al. (2022)*. There is no need to make any change in the function code. The definitions of parameters exist in the main code.
+
+The details of the problems are provided in Oguz et al. (2022)*. 
+
+Note: Line numbers are according to the main code and the provided code are set for the validation problem – 1.
+
+
+<<Validation Problem – 1:>>
+
+Below parameters are to be changed for the validation problem – 1: 
+
+Line #	Parameter	Value
+43	GIS_Data_Directory	Main_Directory + '\\InputData\\Validation\\Problem1'
+126	riInp	np.array(([0.],[86400]))
+136	MCnumber	1
+139	AnalysisType	'Drained'
+140	FSCalType	'Bishop3D'
+165	Mean_cInp	np.array([0.1   , ])
+166	Mean_phiInp	np.array([0.0   , ])
+167	Mean_uwsInp	np.array([1.0   , ])
+171-175	CoV_cInp	np.array([0.0 ,])
+	CoV_phiInp	np.array([0.0 ,])
+	CoV_uwsInp	np.array([0.0 ,])
+	CoV_kSatInp	np.array([0.0 ,])
+	CoV_diffusInp	np.array([0.0 ,])
+186-195	CorrLenX_cInp		np.array(['inf', ])
+	CorrLenY_cInp		np.array(['inf', ])	
+	CorrLenX_phiInp		np.array(['inf', ])
+	CorrLenY_phiInp		np.array(['inf', ])
+	CorrLenX_uwsInp		np.array(['inf', ])
+	CorrLenY_uwsInp		np.array(['inf', ])
+	CorrLenX_kSatInp	np.array(['inf', ])
+	CorrLenY_kSatInp 	np.array(['inf', ])
+	CorrLenX_diffusInp 	np.array(['inf', ])
+	CorrLenY_diffusInp	np.array(['inf', ])
+239	Ella	1
+241	Ellb	1
+243	Ellc	1
+246	EllAlpha	90
+247	EllAlpha_Calc	"No"
+249	Ellz	0.5
+257	InZone	np.array(([int(nrows/2),int(nrows/2)],[int(ncols/2),int(ncols/2)]))
+265	TimeToAnalyse	np.array((0,))
+271	SubDisNum	0
+283	ProblemName	'Pr1'
+309	Multiprocessing_Option	Multiprocessing_Option_List[0] or "C-SP-SP"
+
+Note: In addition to the 3DPLS model:
+•	Pore water pressures are assigned as zero to simulate dry condition when ProblemName is defined as ‘Pr1’. 
+
+Input files with different refinements (cell size) can be found for validation problem-1 in "InputData" folder.
+
+
+<<Validation Problem – 2:>>
+
+Below parameters are to be changed for the validation problem – 2: 
+
+Line #	Parameter	Value
+43	GIS_Data_Directory	Main_Directory + '\\InputData\\Validation\\Problem2' 
+126	riInp	np.array(([0.],[86400]))
+136	MCnumber	1
+139	AnalysisType	'Drained'
+140	FSCalType	'Bishop3D'
+165	Mean_cInp	np.array([0.116 , ])
+166	Mean_phiInp	np.array([15.    , ])
+167	Mean_uwsInp	np.array([1.0    , ])
+171-175	CoV_cInp	np.array([0.0 ,])
+	CoV_phiInp 	np.array([0.0 ,])
+	CoV_uwsInp	np.array([0.0 ,])
+	CoV_kSatInp	np.array([0.0 ,])
+	CoV_diffusInp	np.array([0.0 ,])
+186-195	CorrLenX_cInp		np.array(['inf', ])
+	CorrLenY_cInp		np.array(['inf', ])
+	CorrLenX_phiInp		np.array(['inf', ])
+	CorrLenY_phiInp		np.array(['inf', ])
+	CorrLenX_uwsInp		np.array(['inf', ])
+	CorrLenY_uwsInp		np.array(['inf', ])
+	CorrLenX_kSatInp	np.array(['inf', ])
+	CorrLenY_kSatInp	np.array(['inf', ])
+	CorrLenX_diffusInp	np.array(['inf', ])
+	CorrLenY_diffusInp	np.array(['inf', ])
+239	Ella	2.02
+241	Ellb	2.02
+243	Ellc	2.02
+246	EllAlpha	90
+247	EllAlpha_Calc	"No"
+249	Ellz	1.556
+257	InZone	np.array(([95,95],[149,149]))
+265	TimeToAnalyse	np.array((0,))  
+271	SubDisNum	0
+283	ProblemName	'Pr2'
+309	Multiprocessing_Option  	Multiprocessing_Option_List[0] or "C-SP-SP"
+
+Note: In addition to the 3DPLS model: 
+•	Pore water pressures are assigned as zero to simulate dry condition when ProblemName is defined as ‘Pr2’.
+•	In the 3DPLS model, the center of the ellipsoidal sliding surface is introduced with an offset perpendicular to the ground surface. Therefore, it was not possible to introduce the center of the sliding surface for this problem with the original model. A small modification to the proposed model exists to define the center. 
+
+
+<<Validation Problem – 3:>>
+
+Below parameters are to be changed for the validation problem – 3: 
+
+Line #	Parameter	Value
+43	GIS_Data_Directory	Main_Directory + '\\InputData\\Validation\\Problem3\\Slide1' or
+Main_Directory + '\\InputData\\Validation\\Problem3\\Slide2'
+126	riInp	np.array(([0.],[86400]))
+136	MCnumber	1
+139	AnalysisType	'Drained'
+140	FSCalType	'Bishop3D'
+165	Mean_cInp	np.array([28.7   , ])
+166	Mean_phiInp	np.array([20      , ])
+167	Mean_uwsInp	np.array([18.84 , ])
+171-175	CoV_cInp 	np.array([0.0 ,])
+	CoV_phiInp	np.array([0.0 ,])
+	CoV_uwsInp	np.array([0.0 ,])
+	CoV_kSatInp	np.array([0.0 ,])
+	CoV_diffusInp	np.array([0.0 ,])
+186-195	CorrLenX_cInp		np.array(['inf', ])
+	CorrLenY_cInp		np.array(['inf', ])
+	CorrLenX_phiInp		np.array(['inf', ])
+	CorrLenY_phiInp		np.array(['inf', ])
+	CorrLenX_uwsInp		np.array(['inf', ])
+	CorrLenY_uwsInp		np.array(['inf', ])
+	CorrLenX_kSatInp	np.array(['inf', ])
+	CorrLenY_kSatInp	np.array(['inf', ])
+	CorrLenX_diffusInp	np.array(['inf', ])
+	CorrLenY_diffusInp	np.array(['inf', ])
+239	Ella	24.38
+241	Ellb	24.38
+243	Ellc	24.38
+246	EllAlpha	90
+247	EllAlpha_Calc	"No"
+249	Ellz	16.35
+257	InZone	np.array(([ int(25.5/cellsize), int(25.5/cellsize)],[int(ncols/2-1),int(ncols/2-1)]))
+265	TimeToAnalyse	np.array((0,))  
+271	SubDisNum	0
+283	ProblemName	'Pr3S1Dry' or 'Pr3S2Dry' or 'Pr3S2Wet'
+309	Multiprocessing_Option  	Multiprocessing_Option_List[0] or "C-SP-SP"
+
+Note: In addition to the 3DPLS model: 
+For Slide 1 – Dry:
+•	Pore water pressures are assigned as zero to simulate dry condition when ProblemName is defined as ‘'Pr3S1Dry'.
+•	The inclination of ellipsoidal surface, EllBeta, is assigned directly as the arctan(0.5) instead of calculating for a rectangular area.
+For Slide 2 – Dry:
+•	Pore water pressures are assigned as zero to simulate dry condition when ProblemName is defined as ‘'Pr3S2Dry'.
+•	The inclination of ellipsoidal surface, EllBeta, is assigned directly as the arctan(0.5) instead of calculating for a rectangular area.
+•	The parameters, {"ThetaAvr", "Theta", "AngleTangentXZE1", "A"} are modified when the cells are truncated. For truncated cells, new cohesion and friction angle values are assigned. 
+For Slide 2 – Wet:
+•	Negative pore water pressures are assigned as zero and suction is ignored when ProblemName is defined as ‘'Pr3S2Wet'.
+•	The inclination of ellipsoidal surface, EllBeta, is assigned directly as the arctan(0.5) instead of calculating for a rectangular area.
+•	The parameters, {"ThetaAvr", "Theta", "AngleTangentXZE1", "A"} are modified when the cells are truncated. For truncated cells, new cohesion and friction angle values are assigned. 
+
+
+<<Simplified case problem:>>
+
+Below parameters are to be changed for the simplified case problem: 
+
+Line #	Parameter	Value
+43	GIS_Data_Directory	 Main_Directory + '\\InputData\\SimplifiedCase' 
+126	riInp	np.array(([0.],[86400]))
+136	MCnumber	1000
+139	AnalysisType	'Drained' - 'Undrained'
+140	FSCalType	'Bishop3D'
+146	RanFieldMethod	'CMD'
+148	SaveMat	'YES'
+165	Mean_cInp	np.array([6   , ])
+166	Mean_phiInp	np.array([40 , ])
+167	Mean_uwsInp	np.array([20 , ])
+168	Mean_kSatInp	np.array([1.00E-06, ])
+169	Mean_diffusInp	np.array([5.00E-06, ])
+171	CoV_cInp	np.array([0.1 ,]) - np.array([0.2 ,]) - np.array([0.3 ,])
+172	CoV_phiInp	np.array([0.05 ,]) - np.array([0.10 ,]) - np.array([0.15 ,])
+173-175	CoV_uwsInp	np.array([0.0 ,])
+	CoV_kSatInp	np.array([0.0 ,])
+	CoV_diffusInp	np.array([0.0 ,])
+177	Dist_cInp	np.array(['LN', ])
+178	Dist_phiInp	np.array(['N' , ])
+179	Dist_uwsInp	np.array(['N' , ])
+180	Dist_kSatInp	np.array(['LN', ])
+181	Dist_diffusInp	np.array(['LN', ])
+186-189	CorrLenX_cInp	np.array([0 ,]) - np.array([10 ,]) - np.array([20 ,]) – np.array([50 ,]) - np.array([100 ,]) - np.array([200 ,]) – np.array([500 ,]) - np.array([1000 ,])
+	CorrLenY_cInp	np.array([0 ,]) - np.array([10 ,]) - np.array([20 ,]) – np.array([50 ,]) - np.array([100 ,]) - np.array([200 ,]) – np.array([500 ,]) - np.array([1000 ,])
+	CorrLenX_phiInp	np.array([0 ,]) - np.array([10 ,]) - np.array([20 ,]) – np.array([50 ,]) - np.array([100 ,]) - np.array([200 ,]) – np.array([500 ,]) - np.array([1000 ,])
+	CorrLenY_phiInp	np.array([0 ,]) - np.array([10 ,]) - np.array([20 ,]) – np.array([50 ,]) - np.array([100 ,]) - np.array([200 ,]) – np.array([500 ,]) - np.array([1000 ,])
+190-195	CorrLenX_uwsInp		np.array(['inf', ])
+	CorrLenY_uwsInp		np.array(['inf', ])
+	CorrLenX_kSatInp	np.array(['inf', ])
+	CorrLenY_kSatInp	np.array(['inf', ])
+	CorrLenX_diffusInp	np.array(['inf', ])
+	CorrLenY_diffusInp	np.array(['inf', ])
+207	Mean_SuInp	40
+208	Mean_uwsInp	20
+210	CoV_SuInp	np.array([0.1 ,]) - np.array([0.2 ,]) - np.array([0.3 ,])
+211	CoV_uwsInp	np.array([0.0 ,])
+213	Dist_SuInp	np.array(['LN', ])
+214	Dist_uwsInp	np.array(['N', ])
+219-220	CorrLenX_SuInp	np.array([0 ,]) - np.array([10 ,]) - np.array([20 ,]) – np.array([50 ,]) - np.array([100 ,]) - np.array([200 ,]) – np.array([500 ,]) - np.array([1000 ,])
+	CorrLenY_SuInp	np.array([0 ,]) - np.array([10 ,]) - np.array([20 ,]) – np.array([50 ,]) - np.array([100 ,]) - np.array([200 ,]) – np.array([500 ,]) - np.array([1000 ,])
+221-222	CorrLenX_uwsInp	np.array(['inf', ])
+	CorrLenY_uwsInp	np.array(['inf', ])
+239	Ella	20
+241	Ellb	20
+243	Ellc	2
+246	EllAlpha	90
+247	EllAlpha_Calc	"No"
+249	Ellz	0
+257	InZone	np.array(([10,29],[10,29]))
+265	TimeToAnalyse	np.array((0,))  
+271	SubDisNum	200
+283	ProblemName	'SimpCase'
+309	Multiprocessing_Option  	Multiprocessing_Option_List[7] or "S-MP-MP"
+317	TOTAL_PROCESSES_IndMC	4 (depends on the capacity of the computer)
+318	TOTAL_PROCESSES_EllGen	4 (depends on the capacity of the computer)
+
+Note: In addition to the 3DPLS model: 
+•	During the sub-discretization, the DEM data is recalculated instead of using "np.kron" when ProblemName is defined as ‘'SimpCase'.
+
+ 
+<<Case study: Kvam Landslides:>>
+
+In Oguz et al. (2022)*: "Effects of soil heterogeneity on the susceptibility of shallow landslides", the code has been implemented on a case study: Kvam Landslides. The results can be reproduced using the provided code.
+Below parameters are to be changed for the case study: Kvam Landslides: 
+
+Line #	Parameter	Value
+43	GIS_Data_Directory	Main_Directory + '\\InputData\\KvamCaseStudy'
+126	riInp	np.array(([7.144e-7],[86400]))
+136	MCnumber	1000
+139	AnalysisType	'Drained'
+140	FSCalType	'Bishop3D'
+146	RanFieldMethod	'SCMD'
+148	SaveMat	'YES'
+151	ZmaxVar	'NO'
+165	Mean_cInp	np.array([4.0     , ])
+166	Mean_phiInp	np.array([32.0    , ])
+167	Mean_uwsInp	np.array([20.0    , ])
+168	Mean_kSatInp	np.array([1.00E-06, ])
+169	Mean_diffusInp	np.array([5.00E-06, ])
+171	CoV_cInp	np.array([0.3 ,])
+172	CoV_phiInp	np.array([0.2 ,])
+173	CoV_uwsInp	np.array([0.0 ,])
+174	CoV_kSatInp	np.array([0.0 ,])
+175	CoV_diffusInp	np.array([0.0 ,])
+177	Dist_cInp	np.array(['LN', ])
+178	Dist_phiInp	np.array(['N' , ])
+179	Dist_uwsInp	np.array(['N' , ])
+180	Dist_kSatInp	np.array(['LN', ])
+181	Dist_diffusInp	np.array(['LN', ])
+186	CorrLenX_cInp	np.array([50, ])
+187	CorrLenY_cInp	np.array([50, ])
+188	CorrLenX_phiInp	np.array([50, ])
+189	CorrLenY_phiInp	np.array([50, ])
+190-195	CorrLenX_uwsInp		np.array(['inf', ])
+	CorrLenY_uwsInp		np.array(['inf', ])
+	CorrLenX_kSatInp	np.array(['inf', ])
+	CorrLenY_kSatInp	np.array(['inf', ])
+	CorrLenX_diffusInp	np.array(['inf', ])
+	CorrLenY_diffusInp	np.array(['inf', ])
+239	Ella	100
+241	Ellb	20
+243	Ellc	2.5
+246	EllAlpha	0
+247	EllAlpha_Calc	"No"
+249	Ellz	0
+257	InZone	np.array(([10,107],[20,77]))
+265	TimeToAnalyse	np.array((0,86400))
+271	SubDisNum	100
+283	ProblemName	' '
+309	Multiprocessing_Option	Multiprocessing_Option_List[7] or "S-MP-MP"
+317	TOTAL_PROCESSES_IndMC	4 (depends on the capacity of the computer)
+318	TOTAL_PROCESSES_EllGen	4 (depends on the capacity of the computer)
+
+Note: The lines, {120-123} should be activated. 
+
