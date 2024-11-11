@@ -33,19 +33,15 @@ import pickle
 from multiprocessing import Process, Queue, Array, cpu_count  ## For Parallelization
 import warnings
 
-warnings.filterwarnings(
-    "ignore", category=RuntimeWarning
-)  ##To remove the warnings (due to FS calculation iterations)
+warnings.filterwarnings("ignore", category=RuntimeWarning)  ##To remove the warnings (due to FS calculation iterations)
 
 ## Directories
-# os.path.dirname(os.path.realpath(__file__)) ## The folder is assigned as the current working directory first.
-# Main_Directory      = os.path.dirname(os.getcwd()) ## The main folder
-Main_Directory = r"C:\\3DPLS_v1.0"  ## The main folder
+# os.path.dirname(os.path.realpath(__file__))  ## The folder is assigned as the current working directory first.
+# Main_Directory = os.path.dirname(os.getcwd())  ## The main folder
+Main_Directory = r"C:\\3DPLS\\git\\3DPLS"  ## The main folder
 Code_Directory = Main_Directory + "\\Codes"  ## The folder including the code
 Maxrix_Directory = Main_Directory + "\\Codes\\Matrix"
-GIS_Data_Directory = (
-    Main_Directory + "\\InputData\\Validation\\Problem1"
-)  ## The folder including the input data
+GIS_Data_Directory = Main_Directory + "\\InputData\\Validation\\Problem1"  ## The folder including the input data
 ## Create directories if they do not exist.
 if os.path.exists(Main_Directory + "\\Codes\\Matrix") == False:
     os.makedirs(Main_Directory + "\\Codes\\Matrix")
@@ -69,7 +65,7 @@ os.chdir(Main_Directory)  ## Change directory
 
 ## Import the function to read the ASCII grid format files
 os.chdir(Code_Directory)  ## Change directory
-from Functions_3DPLS_v1_0 import ReadData
+from Functions_3DPLS_v1_1 import ReadData
 
 ## Dimensions of the problem domain
 ## The user can define the dimensions or it can be read from the dem file.
@@ -93,9 +89,7 @@ f.close()
 
 ## Find, read and store the input data with '.asc' extension
 DataFiles = os.listdir(GIS_Data_Directory)
-DataFiles = [
-    i for i in DataFiles if i.endswith(".asc")
-]  ## Name of the files with '.asc' extension in GIS_Data_Directory.
+DataFiles = [i for i in DataFiles if i.endswith(".asc")]  ## Name of the files with '.asc' extension in GIS_Data_Directory.
 NumberData = ReadData(DataFiles)  ## Read files
 NumberDataAndNames = []  ## Allocate. File names and data together
 for i in range(np.size(DataFiles)):
@@ -106,9 +100,7 @@ for i in range(np.size(DataFiles)):
     if DataFiles[i] == "dem.asc":
         DEMInput = NumberDataAndNames[i][1]  ## Digital elevation map data
     elif DataFiles[i] == "dir.asc":
-        DirectionInput = NumberDataAndNames[i][
-            1
-        ]  ## Direction of steepest slope (From TopoIndex or QGIS) (if needed)
+        DirectionInput = NumberDataAndNames[i][1]  ## Direction of steepest slope (From TopoIndex or QGIS) (if needed)
     elif DataFiles[i] == "rizero.asc":
         rizeroInput = NumberDataAndNames[i][1]  ## Steady, background infiltration
     elif DataFiles[i] == "slope.asc":
@@ -118,20 +110,16 @@ for i in range(np.size(DataFiles)):
     elif DataFiles[i] == "aspect.asc":
         AspectInput = NumberDataAndNames[i][1]  ## Aspect (if needed)
     elif DataFiles[i] == "zmax.asc":
-        ZmaxInput = NumberDataAndNames[i][
-            1
-        ]  ## Depth to bedrock (can be obtained later)
+        ZmaxInput = NumberDataAndNames[i][1]  ## Depth to bedrock (can be obtained later)
     elif DataFiles[i] == "source.asc":
         SourceInput = NumberDataAndNames[i][1]  ## Initiation cells, source (if needed)
     elif DataFiles[i] == "depthwt.asc":
-        HwInput = NumberDataAndNames[i][
-            1
-        ]  ## Depth to ground water table (can be obtained later)
+        HwInput = NumberDataAndNames[i][1]  ## Depth to ground water table (can be obtained later)
 
 ## Import the function to arrange the data (Note: Currently the function is for the case study in Oguz et al. (2022): Kvam Lansdlides)
 ## Depending on the problem and needs, the function can be modified.
 # os.chdir(Code_Directory)
-# from Functions_3DPLS_v1_0 import DataArrange
+# from Functions_3DPLS_v1_1 import DataArrange
 # ZoneInput,SlopeInput,DirectionInput,DEMInput,AspectInput,rizeroInput,ZmaxInput,HwInput = \
 #     DataArrange(ZoneInput,SlopeInput,DirectionInput,DEMInput,AspectInput,rizeroInput, NoData)
 
@@ -308,33 +296,11 @@ if AnalysisType == "Drained":  ## Soil properties for drained case
     )
 
     ## Allocate all parameter information
-    Parameter_Means = np.array(
-        [[Mean_cInp], [Mean_phiInp], [Mean_uwsInp], [Mean_kSatInp], [Mean_diffusInp]]
-    )
-    Parameter_CoVs = np.array(
-        [[CoV_cInp], [CoV_phiInp], [CoV_uwsInp], [CoV_kSatInp], [CoV_diffusInp]]
-    )
-    Parameter_Dist = np.array(
-        [[Dist_cInp], [Dist_phiInp], [Dist_uwsInp], [Dist_kSatInp], [Dist_diffusInp]]
-    )
-    Parameter_CorrLenX = np.array(
-        [
-            [CorrLenX_cInp],
-            [CorrLenX_phiInp],
-            [CorrLenX_uwsInp],
-            [CorrLenX_kSatInp],
-            [CorrLenX_diffusInp],
-        ]
-    )
-    Parameter_CorrLenY = np.array(
-        [
-            [CorrLenY_cInp],
-            [CorrLenY_phiInp],
-            [CorrLenY_uwsInp],
-            [CorrLenY_kSatInp],
-            [CorrLenY_diffusInp],
-        ]
-    )
+    Parameter_Means = np.array([[Mean_cInp], [Mean_phiInp], [Mean_uwsInp], [Mean_kSatInp], [Mean_diffusInp]])
+    Parameter_CoVs = np.array([[CoV_cInp], [CoV_phiInp], [CoV_uwsInp], [CoV_kSatInp], [CoV_diffusInp]])
+    Parameter_Dist = np.array([[Dist_cInp], [Dist_phiInp], [Dist_uwsInp], [Dist_kSatInp], [Dist_diffusInp]])
+    Parameter_CorrLenX = np.array([[CorrLenX_cInp], [CorrLenX_phiInp], [CorrLenX_uwsInp], [CorrLenX_kSatInp], [CorrLenX_diffusInp]])
+    Parameter_CorrLenY = np.array([[CorrLenY_cInp], [CorrLenY_phiInp], [CorrLenY_uwsInp], [CorrLenY_kSatInp], [CorrLenY_diffusInp]])
 
 elif AnalysisType == "Undrained":  ## Soil properties for undrained case
 
@@ -399,12 +365,7 @@ elif AnalysisType == "Undrained":  ## Soil properties for undrained case
     ## Allocate all parameter information
     Parameter_Means = np.array([[Mean_SuInp], [Mean_uwsInp]])
     Parameter_CoVs = np.array([[CoV_SuInp], [CoV_uwsInp]])
-    Parameter_Dist = np.array(
-        [
-            [Dist_SuInp],
-            [Dist_uwsInp],
-        ]
-    )
+    Parameter_Dist = np.array([[Dist_SuInp], [Dist_uwsInp]])
     Parameter_CorrLenX = np.array([[CorrLenX_SuInp], [CorrLenX_uwsInp]])
     Parameter_CorrLenY = np.array([[CorrLenY_SuInp], [CorrLenY_uwsInp]])
 
@@ -425,26 +386,17 @@ Ellc = 1.0
 ## If EllAlpha_Calc = "Yes", the aspect of the motion will be averaged for a circular area with a radius of  Ella.
 EllAlpha = 90.0
 EllAlpha_Calc = "No"  ##"Yes" - "No"
-##Offset of the ellipsoid.
+## Offset of the ellipsoid.
 Ellz = 0.5
 # EllParam = np.array((Ella, Ellb, Ellc, EllAlpha, Ellz,EllAlpha_Calc)) ## All ellipsoidal parameters.
-EllParam = [
-    Ella,
-    Ellb,
-    Ellc,
-    EllAlpha,
-    Ellz,
-    EllAlpha_Calc,
-]  ## All ellipsoidal parameters.
+EllParam = [Ella, Ellb, Ellc, EllAlpha, Ellz, EllAlpha_Calc]  ## All ellipsoidal parameters.
 
 ## The investigation zone for the ellipsoidal sliding surfaces.
 ## Note that the ellipsodal sliding surfaces should not be truncated at the edges.
 ## Row start-end and column start-end (including the ends) as rectangular zone.
 ## Then, it will be transfered to the lists of cells (row, column) for generation of ellipsoidal sliding surfaces.
 InZone = np.array(([int(nrows / 2), int(nrows / 2)], [int(ncols / 2), int(ncols / 2)]))
-from Functions_3DPLS_v1_0 import (
-    InZone_Rec_to_List,
-)  ## Otherwise, lists of cells (row, column) can be also defined.
+from Functions_3DPLS_v1_1 import InZone_Rec_to_List  ## Otherwise, lists of cells (row, column) can be also defined.
 
 InZone = InZone_Rec_to_List(InZone)
 
@@ -467,7 +419,7 @@ SubDisNum = 0  ## (Suggested: 100,200)
 #####################################################################################
 """
 ## !!!  For reproducibility purposes, the example problems are provided.
-##For the validation problems and simplified case problem, small changes are required.
+## For the validation problems and simplified case problem, small changes are required.
 ## There are some small modifications to the code when the name assigned as one of the
 ## {'Pr1', 'Pr2','Pr3S1Dry','Pr3S2Dry','Pr3S2Wet' 'SimpCase'}
 ProblemName = "Pr1"
@@ -483,17 +435,9 @@ ProblemName = "Pr1"
 #########
 
 ## Import functions
-from Functions_3DPLS_v1_0 import (
-    FSCalcEllipsoid_v1_0_SingleRrocess,
-    FSCalcEllipsoid_v1_0_MutiProcess,
-)
+from Functions_3DPLS_v1_1 import FSCalcEllipsoid_v1_0_SingleRrocess, FSCalcEllipsoid_v1_0_MutiProcess
 from operator import itemgetter
-from Functions_3DPLS_v1_0 import (
-    Ellipsoid_Generate_Main,
-    Ellipsoid_Generate_Main_Multi,
-    IndMC_Main,
-    IndMC_Main_Multi,
-)
+from Functions_3DPLS_v1_1 import Ellipsoid_Generate_Main, Ellipsoid_Generate_Main_Multi, IndMC_Main, IndMC_Main_Multi
 
 # Allocate processes for Monte Carlo simulations and calculations for ellipsoidal sliding surfaces individually
 print("Total number of processors: %d" % (cpu_count()))
@@ -503,32 +447,17 @@ print("Total number of processors: %d" % (cpu_count()))
 ## "C": combined, "S": separated, "SP": singe process, "MP": multi processes, "MT": multi threads
 ## "C-XX-YY": XX for Monte Carlo simulations, YY for generation of ellipsoidal sliding surfaces in each simulation.
 ## "S-XX-YY": XX for generation of ellipsoidal sliding surfaces, YY for Monte Carlo simulations.
-Multiprocessing_Option_List = [
-    "C-SP-SP",
-    "C-MP-SP",
-    "C-MP-MP",
-    "C-MP-MT",
-    "S-SP-SP",
-    "S-SP-MP",
-    "S-MP-SP",
-    "S-MP-MP",
-]
+Multiprocessing_Option_List = ["C-SP-SP", "C-MP-SP", "C-MP-MP", "C-MP-MT", "S-SP-SP", "S-SP-MP", "S-MP-SP", "S-MP-MP"]
 Multiprocessing_Option = Multiprocessing_Option_List[0]  ## Select 0-7
 
 ## Arrange the numbers of processors / threads for calculations
 ## For options "C-XX-XX"
-TOTAL_PROCESSES_MC = (
-    2  ## Will be utilized if either "C-MP-SP" or "C-MP-MP" run option is selected
-)
+TOTAL_PROCESSES_MC = 2  ## Will be utilized if either "C-MP-SP" or "C-MP-MP" run option is selected
 TOTAL_PROCESSES_ELL = 2  ## Will be utilized if "C-MP-MP" run option is selected
 TOTAL_THREADS_ELL = 2  ## Will be utilized if "C-MP-MT" run option is selected
 ## For options "S-XX-XX"
-TOTAL_PROCESSES_IndMC = (
-    4  ## Will be utilized if either "S-SP-MP" or "S-MP-MP" run option is selected
-)
-TOTAL_PROCESSES_EllGen = (
-    4  ## Will be utilized if either "S-MP-SP" or "S-MP-MP" run option is selected
-)
+TOTAL_PROCESSES_IndMC = 4  ## Will be utilized if either "S-SP-MP" or "S-MP-MP" run option is selected
+TOTAL_PROCESSES_EllGen = 4  ## Will be utilized if either "S-MP-SP" or "S-MP-MP" run option is selected
 
 # "FSCalcEllipsoid_v1_0_SingleRrocess" is normal procedure with single process unit.
 # "FSCalcEllipsoid_v1_0_MutiProcess" is developed to utilize multiple processors.
@@ -547,40 +476,7 @@ if __name__ == "__main__":
     if Multiprocessing_Option == "C-SP-SP":
         print("Run option: (SP)", Multiprocessing_Option)
 
-        FSCalcEllipsoid_v1_0_SingleRrocess(
-            AnalysisType,
-            FSCalType,
-            RanFieldMethod,
-            InZone,
-            SubDisNum,
-            Results_Directory,
-            Code_Directory,
-            Maxrix_Directory,
-            nrows,
-            ncols,
-            nel,
-            cellsize,
-            EllParam,
-            MCnumber,
-            Parameter_Means,
-            Parameter_CoVs,
-            Parameter_Dist,
-            Parameter_CorrLenX,
-            Parameter_CorrLenY,
-            SaveMat,
-            ZoneInput,
-            SlopeInput,
-            ZmaxArg,
-            ZmaxInput,
-            DEMInput,
-            HwInput,
-            rizeroInput,
-            riInp,
-            AspectInput,
-            TimeToAnalyse,
-            NoData,
-            ProblemName,
-        )
+        FSCalcEllipsoid_v1_0_SingleRrocess(AnalysisType, FSCalType, RanFieldMethod, InZone, SubDisNum, Results_Directory, Code_Directory, Maxrix_Directory, nrows, ncols, nel, cellsize, EllParam, MCnumber, Parameter_Means, Parameter_CoVs, Parameter_Dist, Parameter_CorrLenX, Parameter_CorrLenY, SaveMat, ZoneInput, SlopeInput, ZmaxArg, ZmaxInput, DEMInput, HwInput, rizeroInput, riInp, AspectInput, TimeToAnalyse, NoData, ProblemName)
 
         ## Time after the main calculation part of the code
         t2 = time.time()
@@ -591,42 +487,7 @@ if __name__ == "__main__":
         print("Run option: (MP)", Multiprocessing_Option)
 
         FSCalcEllipsoid_v1_0_MutiProcess(
-            Multiprocessing_Option,
-            TOTAL_PROCESSES_MC,
-            TOTAL_PROCESSES_ELL,
-            TOTAL_THREADS_ELL,
-            AnalysisType,
-            FSCalType,
-            RanFieldMethod,
-            InZone,
-            SubDisNum,
-            Results_Directory,
-            Code_Directory,
-            Maxrix_Directory,
-            nrows,
-            ncols,
-            nel,
-            cellsize,
-            EllParam,
-            MCnumber,
-            Parameter_Means,
-            Parameter_CoVs,
-            Parameter_Dist,
-            Parameter_CorrLenX,
-            Parameter_CorrLenY,
-            SaveMat,
-            ZoneInput,
-            SlopeInput,
-            ZmaxArg,
-            ZmaxInput,
-            DEMInput,
-            HwInput,
-            rizeroInput,
-            riInp,
-            AspectInput,
-            TimeToAnalyse,
-            NoData,
-            ProblemName,
+            Multiprocessing_Option, TOTAL_PROCESSES_MC, TOTAL_PROCESSES_ELL, TOTAL_THREADS_ELL, AnalysisType, FSCalType, RanFieldMethod, InZone, SubDisNum, Results_Directory, Code_Directory, Maxrix_Directory, nrows, ncols, nel, cellsize, EllParam, MCnumber, Parameter_Means, Parameter_CoVs, Parameter_Dist, Parameter_CorrLenX, Parameter_CorrLenY, SaveMat, ZoneInput, SlopeInput, ZmaxArg, ZmaxInput, DEMInput, HwInput, rizeroInput, riInp, AspectInput, TimeToAnalyse, NoData, ProblemName
         )
         ## Time after the main calculation part of the code
         t2 = time.time()
@@ -641,21 +502,7 @@ if __name__ == "__main__":
         print("Run option: (Sliding surfaces: SP)", Multiprocessing_Option)
 
         ## Singleprocessing generation of ellipsoidal sliding surfaces
-        AllInf = Ellipsoid_Generate_Main(
-            InZone,
-            SubDisNum,
-            nrows,
-            ncols,
-            nel,
-            cellsize,
-            EllParam,
-            SlopeInput,
-            ZmaxInput,
-            DEMInput,
-            AspectInput,
-            NoData,
-            ProblemName,
-        )
+        AllInf = Ellipsoid_Generate_Main(InZone, SubDisNum, nrows, ncols, nel, cellsize, EllParam, SlopeInput, ZmaxInput, DEMInput, AspectInput, NoData, ProblemName)
 
         ## Save sliding surfaces' information
         AllInf = AllInf[:]
@@ -675,22 +522,7 @@ if __name__ == "__main__":
         print("Run option: (Sliding surfaces: MP)", Multiprocessing_Option)
 
         ## Multiprocessing generation of ellipsoidal sliding surfaces
-        AllInf = Ellipsoid_Generate_Main_Multi(
-            TOTAL_PROCESSES_EllGen,
-            InZone,
-            SubDisNum,
-            nrows,
-            ncols,
-            nel,
-            cellsize,
-            EllParam,
-            SlopeInput,
-            ZmaxInput,
-            DEMInput,
-            AspectInput,
-            NoData,
-            ProblemName,
-        )
+        AllInf = Ellipsoid_Generate_Main_Multi(TOTAL_PROCESSES_EllGen, InZone, SubDisNum, nrows, ncols, nel, cellsize, EllParam, SlopeInput, ZmaxInput, DEMInput, AspectInput, NoData, ProblemName)
 
         ## Save sliding surfaces' information
         AllInf = AllInf[:]
@@ -713,33 +545,7 @@ if __name__ == "__main__":
     if Multiprocessing_Option in ["S-SP-SP", "S-MP-SP"]:
         print("Run option: (MC simulations: SP)", Multiprocessing_Option)
 
-        IndMC_Main(
-            AllInf_sorted,
-            AnalysisType,
-            FSCalType,
-            RanFieldMethod,
-            InZone,
-            Results_Directory,
-            Maxrix_Directory,
-            nrows,
-            ncols,
-            cellsize,
-            MCnumber,
-            Parameter_Means,
-            Parameter_CoVs,
-            Parameter_Dist,
-            Parameter_CorrLenX,
-            Parameter_CorrLenY,
-            SaveMat,
-            SlopeInput,
-            ZoneInput,
-            HwInput,
-            rizeroInput,
-            riInp,
-            TimeToAnalyse,
-            NoData,
-            ProblemName,
-        )
+        IndMC_Main(AllInf_sorted, AnalysisType, FSCalType, RanFieldMethod, InZone, Results_Directory, Maxrix_Directory, nrows, ncols, cellsize, MCnumber, Parameter_Means, Parameter_CoVs, Parameter_Dist, Parameter_CorrLenX, Parameter_CorrLenY, SaveMat, SlopeInput, ZoneInput, HwInput, rizeroInput, riInp, TimeToAnalyse, NoData, ProblemName)
 
         ## Time elapsed for Monte Carlo simulations
         t3 = time.time()
@@ -749,34 +555,7 @@ if __name__ == "__main__":
     if Multiprocessing_Option in ["S-SP-MP", "S-MP-MP"]:
         print("Run option: (MC simulations: MP)", Multiprocessing_Option)
 
-        IndMC_Main_Multi(
-            TOTAL_PROCESSES_IndMC,
-            AllInf_sorted,
-            AnalysisType,
-            FSCalType,
-            RanFieldMethod,
-            InZone,
-            Results_Directory,
-            Maxrix_Directory,
-            nrows,
-            ncols,
-            cellsize,
-            MCnumber,
-            Parameter_Means,
-            Parameter_CoVs,
-            Parameter_Dist,
-            Parameter_CorrLenX,
-            Parameter_CorrLenY,
-            SaveMat,
-            SlopeInput,
-            ZoneInput,
-            HwInput,
-            rizeroInput,
-            riInp,
-            TimeToAnalyse,
-            NoData,
-            ProblemName,
-        )
+        IndMC_Main_Multi(TOTAL_PROCESSES_IndMC, AllInf_sorted, AnalysisType, FSCalType, RanFieldMethod, InZone, Results_Directory, Maxrix_Directory, nrows, ncols, cellsize, MCnumber, Parameter_Means, Parameter_CoVs, Parameter_Dist, Parameter_CorrLenX, Parameter_CorrLenY, SaveMat, SlopeInput, ZoneInput, HwInput, rizeroInput, riInp, TimeToAnalyse, NoData, ProblemName)
 
         ## Time elapsed for Monte Carlo simulations
         t3 = time.time()

@@ -12,6 +12,13 @@ scipy = "^1.14.1"
 matplotlib = "^3.9.2"
 
 
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.29.5"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 150
+skip-string-normalization = true

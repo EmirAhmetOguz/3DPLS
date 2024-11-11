@@ -1,0 +1,13 @@
+[flake8]
+# Set the maximum allowed line length to 120 characters
+max-line-length = 150
+skip-string-normalization = true  # Prevent reformatting strings and comments
+
+# Ignore warnings related to line length (E501), line break before binary operator (W503), and too many leading '#' for block comment (E266)
+ignore = E501, W503, E266, E262
+
+# Exclude specific directories from being checked
+exclude = migrations/*, tests/*
+
+# Enable only specific error codes
+select = E, F, W

@@ -122,21 +122,14 @@ def Calculate_DEM_SimpCase(DEMInput, SlopeInput, nrows_org, nrows, ncols, cellsi
     DEMInput = np.zeros((nrows, ncols))
     for i in range(ncols - 1, -1, -1):
         for j in range(nrows - 2, -1, -1):
-            DEMInput[j, i] = DEMInput[j + 1, i] + (
-                cellsize / 2 * np.tan(np.radians(SlopeInput[j + 1, i]))
-                + cellsize / 2 * np.tan(np.radians(SlopeInput[j, i]))
-            )
-    DEMInput = (
-        DEMInput + 50 - (nrows / nrows_org - 1) * cellsize / 2 * np.tan(np.radians(25))
-    )  # I added but no need.
+            DEMInput[j, i] = DEMInput[j + 1, i] + (cellsize / 2 * np.tan(np.radians(SlopeInput[j + 1, i])) + cellsize / 2 * np.tan(np.radians(SlopeInput[j, i])))
+    DEMInput = DEMInput + 50 - (nrows / nrows_org - 1) * cellsize / 2 * np.tan(np.radians(25))  # I added but no need.
 
     return DEMInput
 
 
 # ---------------------------------------------------------------------------------
-def DataArrange(
-    ZoneInput, SlopeInput, DirectionInput, DEMInput, AspectInput, rizeroInput, NoData
-):
+def DataArrange(ZoneInput, SlopeInput, DirectionInput, DEMInput, AspectInput, rizeroInput, NoData):
     """
     ## Here, the aim is to arrange the data upon the desire.
     ## Any arangement can be done here.
@@ -172,9 +165,7 @@ def DataArrange(
 
     ## Some arrangements upon the need
     ZoneInput[ZoneInput == 21] = 1  # Zone 1: Moraine
-    ZoneInput[ZoneInput == 17] = (
-        1  # Zone 2: Shallow moraine (Still accepted Moraine in this case)
-    )
+    ZoneInput[ZoneInput == 17] = 1  # Zone 2: Shallow moraine (Still accepted Moraine in this case)
     ZoneInput[ZoneInput == 5] = NoData
     ZoneInput[ZoneInput == 9] = NoData
     ZoneInput[ZoneInput == 22] = NoData
@@ -236,18 +227,7 @@ def InZone_Rec_to_List(InZone):
 
 
 # ---------------------------------------------------------------------------------
-def RFR(
-    nrows,
-    ncols,
-    cellsize,
-    Maxrix_Directory,
-    CorrLengthX,
-    CorrLengthY,
-    ParMean,
-    ParCoV,
-    DistType="N",
-    SaveMat="NO",
-):
+def RFR(nrows, ncols, cellsize, Maxrix_Directory, CorrLengthX, CorrLengthY, ParMean, ParCoV, DistType="N", SaveMat="NO"):
     """
     ## Random fields are created.
 
@@ -316,23 +296,14 @@ def RFR(
             CorrMat = np.zeros((nrows * ncols, nrows * ncols))
             for i in range(nel):
                 for j in range(i, nel):
-                    CorrMat[i, j] = np.exp(
-                        -2.0
-                        * np.sqrt(
-                            (xm[i, 0] - xm[j, 0]) ** 2 / CorrLengthX**2
-                            + (ym[i, 0] - ym[j, 0]) ** 2 / CorrLengthY**2
-                        )
-                    )
+                    CorrMat[i, j] = np.exp(-2.0 * np.sqrt((xm[i, 0] - xm[j, 0]) ** 2 / CorrLengthX**2 + (ym[i, 0] - ym[j, 0]) ** 2 / CorrLengthY**2))
                     CorrMat[j, i] = CorrMat[i, j]
 
     ## Save the matrix for further use.
     if SaveMat == "YES":
         if os.path.isfile(Name) == False:
             np.save(Name, CorrMat)
-            print(
-                "Correlation matrix is generated for %d_%d "
-                % (CorrLengthX, CorrLengthY)
-            )
+            print("Correlation matrix is generated for %d_%d " % (CorrLengthX, CorrLengthY))
 
     ## Cholesky decomposition
     # A1 = sl.cholesky(CorrMat,lower=True)
@@ -341,9 +312,7 @@ def RFR(
     U = np.random.normal(0, 1, nel)
 
     if DistType == "N":  ## For normal distribution
-        ParInp = ParMean + (ParCoV * ParMean) * np.reshape(
-            np.dot(A1, U), (nrows, ncols)
-        )
+        ParInp = ParMean + (ParCoV * ParMean) * np.reshape(np.dot(A1, U), (nrows, ncols))
 
     elif DistType == "LN":  ## For lognormal distribution
         ## Parameters of the underlying normal distribution
@@ -373,9 +342,7 @@ def RFR(
 
 
 # ---------------------------------------------------------------------------------
-def StepwiseRFR(
-    nrows, ncols, cellsize, CorrLengthX, CorrLengthY, ParMean, ParCoV, DistType="N"
-):
+def StepwiseRFR(nrows, ncols, cellsize, CorrLengthX, CorrLengthY, ParMean, ParCoV, DistType="N"):
     """
      ## Stepwise random field realization are created.
      ## This decreases the time significantly while it has one drawback of assuming separable correlation coefficient function.
@@ -427,15 +394,11 @@ def StepwiseRFR(
         ## Correlation matrix for X and Y
         for i in range(ncols):
             for j in range(i, ncols):
-                CorrMatX[i, j] = np.exp(
-                    -2.0 * np.sqrt((x[i] - x[j]) ** 2 / CorrLengthX**2)
-                )
+                CorrMatX[i, j] = np.exp(-2.0 * np.sqrt((x[i] - x[j]) ** 2 / CorrLengthX**2))
                 CorrMatX[j, i] = CorrMatX[i, j]
         for i in range(nrows):
             for j in range(i, nrows):
-                CorrMatY[i, j] = np.exp(
-                    -2.0 * np.sqrt((y[i] - y[j]) ** 2 / CorrLengthY**2)
-                )
+                CorrMatY[i, j] = np.exp(-2.0 * np.sqrt((y[i] - y[j]) ** 2 / CorrLengthY**2))
                 CorrMatY[j, i] = CorrMatY[i, j]
 
     ## Cholesky decomposition and generation of random field
@@ -451,9 +414,7 @@ def StepwiseRFR(
 
     if DistType == "N":
 
-        ParInp = (
-            ParMean + (ParCoV * ParMean) * np.matmul(np.matmul(Ax, U), np.transpose(Ay))
-        ).T  # For normal distribution
+        ParInp = (ParMean + (ParCoV * ParMean) * np.matmul(np.matmul(Ax, U), np.transpose(Ay))).T  # For normal distribution
 
     elif DistType == "LN":
 
@@ -461,9 +422,7 @@ def StepwiseRFR(
         SigLnPar = np.sqrt(np.log(1 + ParCoV**2))
         MuLnPar = np.log(ParMean) - 0.5 * SigLnPar**2
 
-        ParInp = (
-            np.exp(MuLnPar + SigLnPar * np.matmul(np.matmul(Ax, U), np.transpose(Ay)))
-        ).T  # For lognormal distribution
+        ParInp = (np.exp(MuLnPar + SigLnPar * np.matmul(np.matmul(Ax, U), np.transpose(Ay)))).T  # For lognormal distribution
 
     # t2 = time.time() ## Time (if needed)
     # print('Stepwise method time: %f ' %(t2-t1)) ## Time required to create random field
@@ -489,19 +448,7 @@ def StepwiseRFR(
 
 
 # ---------------------------------------------------------------------------------
-def StepwiseRFRv2(
-    nrows,
-    ncols,
-    cellsize,
-    CorrLengthX,
-    CorrLengthY,
-    ParMean,
-    ParCoV,
-    Maxrix_Directory,
-    DistType="N",
-    SaveMat="NO",
-    *args
-):  ## OK
+def StepwiseRFRv2(nrows, ncols, cellsize, CorrLengthX, CorrLengthY, ParMean, ParCoV, Maxrix_Directory, DistType="N", SaveMat="NO", *args):  ## OK
     """
      ## Stepwise random field realization are created.
      ## This decreases the time significantly while it has one drawback of assuming separable correlation coefficient function.
@@ -579,15 +526,11 @@ def StepwiseRFRv2(
         else:
             for i in range(ncols):
                 for j in range(i, ncols):
-                    CorrMatX[i, j] = np.exp(
-                        -2.0 * np.sqrt((x[i] - x[j]) ** 2 / CorrLengthX**2)
-                    )
+                    CorrMatX[i, j] = np.exp(-2.0 * np.sqrt((x[i] - x[j]) ** 2 / CorrLengthX**2))
                     CorrMatX[j, i] = CorrMatX[i, j]
             for i in range(nrows):
                 for j in range(i, nrows):
-                    CorrMatY[i, j] = np.exp(
-                        -2.0 * np.sqrt((y[i] - y[j]) ** 2 / CorrLengthY**2)
-                    )
+                    CorrMatY[i, j] = np.exp(-2.0 * np.sqrt((y[i] - y[j]) ** 2 / CorrLengthY**2))
                     CorrMatY[j, i] = CorrMatY[i, j]
 
     ## Save the matrix for further use.
@@ -618,9 +561,7 @@ def StepwiseRFRv2(
 
     if DistType == "N":
 
-        ParInp = (
-            ParMean + (ParCoV * ParMean) * np.matmul(np.matmul(Ax, U), np.transpose(Ay))
-        ).T  # For normal distribution
+        ParInp = (ParMean + (ParCoV * ParMean) * np.matmul(np.matmul(Ax, U), np.transpose(Ay))).T  # For normal distribution
 
     elif DistType == "LN":
 
@@ -628,9 +569,7 @@ def StepwiseRFRv2(
         SigLnPar = np.sqrt(np.log(1 + ParCoV**2))
         MuLnPar = np.log(ParMean) - 0.5 * SigLnPar**2
 
-        ParInp = (
-            np.exp(MuLnPar + SigLnPar * np.matmul(np.matmul(Ax, U), np.transpose(Ay)))
-        ).T  # For lognormal distribution
+        ParInp = (np.exp(MuLnPar + SigLnPar * np.matmul(np.matmul(Ax, U), np.transpose(Ay)))).T  # For lognormal distribution
 
     # t2 = time.time() ## Time (if needed)
     # print('Stepwise method time: %f ' %(t2-t1)) ## Time required to create random field
@@ -662,21 +601,7 @@ def StepwiseRFRv2(
 
 
 # ---------------------------------------------------------------------------------
-def CellsInsideEllV2(
-    nrows,
-    ncols,
-    cellsize,
-    DEMInput,
-    EllCenterX,
-    EllCenterY,
-    EllDEMCenter,
-    EllAlpha,
-    EllBeta,
-    Ella,
-    Ellb,
-    Ellc,
-    Ellz,
-):
+def CellsInsideEllV2(nrows, ncols, cellsize, DEMInput, EllCenterX, EllCenterY, EllDEMCenter, EllAlpha, EllBeta, Ella, Ellb, Ellc, Ellz):
     """
     ## This function returns the cells inside the ellipsoid.
     ## This is 3D version of the previous function, CellsInsideEll
@@ -738,12 +663,8 @@ def CellsInsideEllV2(
     CoorEll = CoorG2[:] - np.array((0, 0, EllCenterX, EllCenterY, EllDEMCenter))
 
     ## Coordinates according to the center of allipsoid with a rotation alpha, el
-    x1 = CoorEll[:, 2] * np.cos(np.radians(EllAlpha)) - CoorEll[:, 3] * np.sin(
-        np.radians(EllAlpha)
-    )
-    y1 = CoorEll[:, 3] * np.cos(np.radians(EllAlpha)) + CoorEll[:, 2] * np.sin(
-        np.radians(EllAlpha)
-    )
+    x1 = CoorEll[:, 2] * np.cos(np.radians(EllAlpha)) - CoorEll[:, 3] * np.sin(np.radians(EllAlpha))
+    y1 = CoorEll[:, 3] * np.cos(np.radians(EllAlpha)) + CoorEll[:, 2] * np.sin(np.radians(EllAlpha))
     z1 = CoorEll[:, 4]
 
     ## Coordinates according to the center of allipsoid with a rotation alpha, elll
@@ -771,11 +692,7 @@ def CellsInsideEllV2(
     CellsInside = []
     indexes = []
     for i in range(np.shape(CoorEll11)[0]):
-        cond = (
-            CoorEll11[i][2] ** 2 / Ella**2
-            + CoorEll11[i][3] ** 2 / Ellb**2
-            + CoorEll11[i][4] ** 2 / Ellc**2
-        ) <= 1
+        cond = (CoorEll11[i][2] ** 2 / Ella**2 + CoorEll11[i][3] ** 2 / Ellb**2 + CoorEll11[i][4] ** 2 / Ellc**2) <= 1
         if cond:
             CellsInside.append([CoorEll[i, 0], CoorEll[i, 1], x1[i], y1[i], z1[i]])
             indexes.append((i))
@@ -880,24 +797,11 @@ def calz(x, y, Ella, Ellb, Ellc):
         z value according to the e'' coordinate system. x, y should be according to e'' .
     """
 
-    return Ellc * np.sqrt(
-        1 - (x**2) / (Ella**2) - (y**2) / (Ellb**2)
-    )  ## directly calculated
+    return Ellc * np.sqrt(1 - (x**2) / (Ella**2) - (y**2) / (Ellb**2))  ## directly calculated
 
 
 # ---------------------------------------------------------------------------------
-def HydrologyModel_v1_0(
-    TimeToAnalyse,
-    CellsInside,
-    A,
-    HwInput,
-    rizeroInput,
-    riInp,
-    Ksat,
-    Diff0,
-    Thickness,
-    SlopeInput,
-):
+def HydrologyModel_v1_0(TimeToAnalyse, CellsInside, A, HwInput, rizeroInput, riInp, Ksat, Diff0, Thickness, SlopeInput):
     """
     In v1_0, Ksat, Diff0 can be variable. I changed only the KsatInside and Diff0inside.
     It provides results at given time instances.
@@ -940,42 +844,30 @@ def HydrologyModel_v1_0(
     """
 
     ## Depth of ground water table for the cells inside sliding zone
-    HwValuesInside = HwInput[
-        (CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))
-    ]
+    HwValuesInside = HwInput[(CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))]
     HwValuesInside = np.reshape(HwValuesInside, (np.shape(CellsInside)[0], 1))
 
     ## Steady, background infiltration for the cells inside sliding zone
-    rizeroInside = rizeroInput[
-        (CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))
-    ]
+    rizeroInside = rizeroInput[(CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))]
     rizeroInside = np.reshape(rizeroInside, (np.shape(CellsInside)[0], 1))
 
     ## Arrange saturated permeability and diffusivity parameters for the calculations
     # KsatInside  = np.ones((np.shape(CellsInside)[0],1)) * Ksat
-    KsatInside = Ksat[
-        (CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))
-    ]  ## v1_0
+    KsatInside = Ksat[(CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))]  ## v1_0
     KsatInside = np.reshape(KsatInside, (np.shape(CellsInside)[0], 1))  ## v1_0
     # Diff0inside = np.ones((np.shape(CellsInside)[0],1)) * Diff0
-    Diff0inside = Diff0[
-        (CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))
-    ]  ## v1_0
+    Diff0inside = Diff0[(CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))]  ## v1_0
     Diff0inside = np.reshape(Diff0inside, (np.shape(CellsInside)[0], 1))  ## v1_0
 
     ## Slope angles for the cells inside sliding zone
-    SlopeInside = SlopeInput[
-        (CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))
-    ]
+    SlopeInside = SlopeInput[(CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))]
     SlopeInside = np.reshape(SlopeInside, (np.shape(CellsInside)[0], 1))
 
     ## Arrange the rainfall input data (m/sec)
     riInside = np.ones((np.shape(CellsInside)[0], 1)) * riInp[0]
 
     ## The parameter Beta in Iverson's formulation (See Iverson (2000))
-    BetaIverson = (
-        np.square(np.cos(np.radians(SlopeInside[:]))) - rizeroInside / KsatInside
-    )
+    BetaIverson = np.square(np.cos(np.radians(SlopeInside[:]))) - rizeroInside / KsatInside
 
     """
     ## Old version for single time instance
@@ -1023,49 +915,31 @@ def HydrologyModel_v1_0(
         ## Currently the formulation is for time lower or equal the time of the rainfall.
         ## It can be simply modified to analyse times after rainfall.
         if TimeCurrent > riInp[1][0] or TimeCurrent < 0:
-            print(
-                "Check time to analse! If you want to assign time greater than the storm, modify the equations!"
-            )
+            print("Check time to analse! If you want to assign time greater than the storm, modify the equations!")
             print("Now, the time is assigned as zero")
             # TimeToAnalyse = 0
 
         if TimeCurrent == 0:
-            SteadyP = np.multiply(
-                (Thickness - HwValuesInside), BetaIverson
-            )  ## unit is m
+            SteadyP = np.multiply((Thickness - HwValuesInside), BetaIverson)  ## unit is m
             TransientP = np.zeros((np.shape(CellsInside)[0], 1))  ## unit is m
 
         else:
-            SteadyP = np.multiply(
-                (Thickness - HwValuesInside), BetaIverson
-            )  ## unit is m
-            DiffIverson = np.multiply(
-                (4 * Diff0inside), np.square(np.cos(np.radians(SlopeInside[:])))
-            )
+            SteadyP = np.multiply((Thickness - HwValuesInside), BetaIverson)  ## unit is m
+            DiffIverson = np.multiply((4 * Diff0inside), np.square(np.cos(np.radians(SlopeInside[:]))))
             t_star = (TimeCurrent * DiffIverson) / np.square(Thickness)
-            Response = np.multiply(
-                np.sqrt(t_star / np.pi), np.exp(-1 / t_star)
-            ) - special.erfc(1 / np.sqrt(t_star))
-            TransientP = np.multiply(
-                (np.multiply((riInside / KsatInside), Thickness)), Response
-            )  ## unit is m
+            Response = np.multiply(np.sqrt(t_star / np.pi), np.exp(-1 / t_star)) - special.erfc(1 / np.sqrt(t_star))
+            TransientP = np.multiply((np.multiply((riInside / KsatInside), Thickness)), Response)  ## unit is m
 
         ## Pore water pressure is the sum of steady and transient pressure heads
-        PoreWaterPressure = (
-            SteadyP + TransientP
-        ) * 10  ## 10 is the unit weight of water
+        PoreWaterPressure = (SteadyP + TransientP) * 10  ## 10 is the unit weight of water
 
         ## The values are limited by values assuming saturated soil with slope parallel flow.
-        MaxWaterPressure = (
-            np.multiply(Thickness, BetaIverson) * 10
-        )  ## 10 is the unit weight of water
+        MaxWaterPressure = np.multiply(Thickness, BetaIverson) * 10  ## 10 is the unit weight of water
         ## Limit the pore pressures values by Z*BetaIverson
         # for i in range(np.shape(CellsInside)[0]):
         #     if (PoreWaterPressure[i] > MaxWaterPressure[i]):
         #          PoreWaterPressure[i] = MaxWaterPressure[i]
-        PoreWaterPressure = np.where(
-            PoreWaterPressure > MaxWaterPressure, MaxWaterPressure, PoreWaterPressure
-        )
+        PoreWaterPressure = np.where(PoreWaterPressure > MaxWaterPressure, MaxWaterPressure, PoreWaterPressure)
 
         ## Calculate pore water pressure
         PoreWaterForce.append(np.multiply(PoreWaterPressure, A))
@@ -1074,18 +948,7 @@ def HydrologyModel_v1_0(
 
 
 # ---------------------------------------------------------------------------------
-def HydrologyModel_v1_0_SingleTime(
-    TimeToAnalyse,
-    CellsInside,
-    A,
-    HwInput,
-    rizeroInput,
-    riInp,
-    Ksat,
-    Diff0,
-    Thickness,
-    SlopeInput,
-):
+def HydrologyModel_v1_0_SingleTime(TimeToAnalyse, CellsInside, A, HwInput, rizeroInput, riInp, Ksat, Diff0, Thickness, SlopeInput):
     """
     In v1_0, Ksat, Diff0 can be variable. I changed only the KsatInside and Diff0inside.
     ####################################
@@ -1127,49 +990,35 @@ def HydrologyModel_v1_0_SingleTime(
     """
 
     ## Depth of ground water table for the cells inside sliding zone
-    HwValuesInside = HwInput[
-        (CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))
-    ]
+    HwValuesInside = HwInput[(CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))]
     HwValuesInside = np.reshape(HwValuesInside, (np.shape(CellsInside)[0], 1))
 
     ## Steady, background infiltration for the cells inside sliding zone
-    rizeroInside = rizeroInput[
-        (CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))
-    ]
+    rizeroInside = rizeroInput[(CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))]
     rizeroInside = np.reshape(rizeroInside, (np.shape(CellsInside)[0], 1))
 
     ## Arrange saturated permeability and diffusivity parameters for the calculations
     # KsatInside  = np.ones((np.shape(CellsInside)[0],1)) * Ksat
-    KsatInside = Ksat[
-        (CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))
-    ]  ## v1_0
+    KsatInside = Ksat[(CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))]  ## v1_0
     KsatInside = np.reshape(KsatInside, (np.shape(CellsInside)[0], 1))  ## v1_0
     # Diff0inside = np.ones((np.shape(CellsInside)[0],1)) * Diff0
-    Diff0inside = Diff0[
-        (CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))
-    ]  ## v1_0
+    Diff0inside = Diff0[(CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))]  ## v1_0
     Diff0inside = np.reshape(Diff0inside, (np.shape(CellsInside)[0], 1))  ## v1_0
 
     ## Slope angles for the cells inside sliding zone
-    SlopeInside = SlopeInput[
-        (CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))
-    ]
+    SlopeInside = SlopeInput[(CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))]
     SlopeInside = np.reshape(SlopeInside, (np.shape(CellsInside)[0], 1))
 
     ## Arrange the rainfall input data (m/sec)
     riInside = np.ones((np.shape(CellsInside)[0], 1)) * riInp[0]
 
     ## The parameter Beta in Iverson's formulation (See Iverson (2000))
-    BetaIverson = (
-        np.square(np.cos(np.radians(SlopeInside[:]))) - rizeroInside / KsatInside
-    )
+    BetaIverson = np.square(np.cos(np.radians(SlopeInside[:]))) - rizeroInside / KsatInside
 
     ## Currently the formulation is for time lower or equal the time of the rainfall.
     ## It can be simply modified to analyse times after rainfall.
     if TimeToAnalyse > riInp[1][0] or TimeToAnalyse < 0:
-        print(
-            "Check time to analse! If you want to assign time greater than the storm, modify the equations!"
-        )
+        print("Check time to analse! If you want to assign time greater than the storm, modify the equations!")
         print("Now, the time is assigned as zero")
         TimeToAnalyse = 0
 
@@ -1179,31 +1028,21 @@ def HydrologyModel_v1_0_SingleTime(
 
     else:
         SteadyP = np.multiply((Thickness - HwValuesInside), BetaIverson)  ## unit is m
-        DiffIverson = np.multiply(
-            (4 * Diff0inside), np.square(np.cos(np.radians(SlopeInside[:])))
-        )
+        DiffIverson = np.multiply((4 * Diff0inside), np.square(np.cos(np.radians(SlopeInside[:]))))
         t_star = (TimeToAnalyse * DiffIverson) / np.square(Thickness)
-        Response = np.multiply(
-            np.sqrt(t_star / np.pi), np.exp(-1 / t_star)
-        ) - special.erfc(1 / np.sqrt(t_star))
-        TransientP = np.multiply(
-            (np.multiply((riInside / KsatInside), Thickness)), Response
-        )  ## unit is m
+        Response = np.multiply(np.sqrt(t_star / np.pi), np.exp(-1 / t_star)) - special.erfc(1 / np.sqrt(t_star))
+        TransientP = np.multiply((np.multiply((riInside / KsatInside), Thickness)), Response)  ## unit is m
 
     ## Pore water pressure is the sum of steady and transient pressure heads
     PoreWaterPressure = (SteadyP + TransientP) * 10  ## 10 is the unit weight of water
 
     ## The values are limited by values assuming saturated soil with slope parallel flow.
-    MaxWaterPressure = (
-        np.multiply(Thickness, BetaIverson) * 10
-    )  ## 10 is the unit weight of water
+    MaxWaterPressure = np.multiply(Thickness, BetaIverson) * 10  ## 10 is the unit weight of water
     ## Limit the pore pressures values by Z*BetaIverson
     # for i in range(np.shape(CellsInside)[0]):
     #     if (PoreWaterPressure[i] > MaxWaterPressure[i]):
     #          PoreWaterPressure[i] = MaxWaterPressure[i]
-    PoreWaterPressure = np.where(
-        PoreWaterPressure > MaxWaterPressure, MaxWaterPressure, PoreWaterPressure
-    )
+    PoreWaterPressure = np.where(PoreWaterPressure > MaxWaterPressure, MaxWaterPressure, PoreWaterPressure)
 
     ## Calculate pore water pressure
     PoreWaterForce = np.multiply(PoreWaterPressure, A)
@@ -1253,20 +1092,8 @@ def FSNormal3D(c, phi, A, Weight, PoreWaterForce, Theta, ThetaAvr, AngleTangentX
 
     ## Calculation of resistance and driving forces
     for i in range(np.shape(A)[0]):
-        ResForce.append(
-            (
-                c[i] * A[i]
-                + (Weight[i] * np.cos(np.radians(Theta[i])) - PoreWaterForce[i])
-                * np.tan(np.radians(phi[i]))
-            )
-            * np.cos(np.radians(ThetaAvr[i]))
-        )
-        DriForce.append(
-            np.sign(AngleTangentXZE1[i])
-            * Weight[i]
-            * np.sin(np.radians(ThetaAvr[i]))
-            * np.cos(np.radians(ThetaAvr[i]))
-        )
+        ResForce.append((c[i] * A[i] + (Weight[i] * np.cos(np.radians(Theta[i])) - PoreWaterForce[i]) * np.tan(np.radians(phi[i]))) * np.cos(np.radians(ThetaAvr[i])))
+        DriForce.append(np.sign(AngleTangentXZE1[i]) * Weight[i] * np.sin(np.radians(ThetaAvr[i])) * np.cos(np.radians(ThetaAvr[i])))
 
     ## Adjust resistence and driving forces
     ResForce = np.asarray(ResForce)
@@ -1353,34 +1180,11 @@ def FSBishop3D(x, *DataFunction):
 
     ## Calculations for Bishop 3D method
     for i in range(np.shape(CellsInside)[0]):
-        NValues[i] = (
-            Weight[i]
-            + (1 / FSGuess)
-            * PoreWaterForce[i]
-            * np.tan(np.radians(phi[i]))
-            * np.sin(np.radians(ThetaAvr[i]))
-            - (1 / FSGuess) * c[i] * A[i] * np.sin(np.radians(ThetaAvr[i]))
-        ) / (
-            np.cos(np.radians(Theta[i]))
-            + (1 / FSGuess)
-            * np.tan(np.radians(phi[i]))
-            * np.sin(np.radians(ThetaAvr[i]))
-        )
+        NValues[i] = (Weight[i] + (1 / FSGuess) * PoreWaterForce[i] * np.tan(np.radians(phi[i])) * np.sin(np.radians(ThetaAvr[i])) - (1 / FSGuess) * c[i] * A[i] * np.sin(np.radians(ThetaAvr[i]))) / (np.cos(np.radians(Theta[i])) + (1 / FSGuess) * np.tan(np.radians(phi[i])) * np.sin(np.radians(ThetaAvr[i])))
         # NValues[i] = (0 if NValues[i] < 0 else NValues[i] )
-        part1[i] = (
-            np.sign(AngleTangentXZE1[i]) * Weight[i] * np.sin(np.radians(ThetaAvr[i]))
-        )
+        part1[i] = np.sign(AngleTangentXZE1[i]) * Weight[i] * np.sin(np.radians(ThetaAvr[i]))
         # part1[i] = (NValues[i] - PoreWaterForce[i]) *  np.tan(np.radians(phi)) * (1/FSGuess) + c*A[i]* (1/FSGuess)
-        part2[i] = (
-            (Weight[i] - PoreWaterForce[i] * np.cos(np.radians(Theta[i])))
-            * np.tan(np.radians(phi[i]))
-            + c[i] * A[i] * np.cos(np.radians(Theta[i]))
-        ) / (
-            np.cos(np.radians(Theta[i]))
-            + (1 / FSGuess)
-            * np.tan(np.radians(phi[i]))
-            * np.sin(np.radians(ThetaAvr[i]))
-        )
+        part2[i] = ((Weight[i] - PoreWaterForce[i] * np.cos(np.radians(Theta[i]))) * np.tan(np.radians(phi[i])) + c[i] * A[i] * np.cos(np.radians(Theta[i]))) / (np.cos(np.radians(Theta[i])) + (1 / FSGuess) * np.tan(np.radians(phi[i])) * np.sin(np.radians(ThetaAvr[i])))
 
     ## Calculate FC
     FSCalc = ((np.sum(part1)) ** (-1)) * np.sum(part2)
@@ -1454,28 +1258,10 @@ def FSJanbu3D(x, *DataFunction):
 
     ## Calculations for Janbu 3D method
     for i in range(np.shape(CellsInside)[0]):
-        NValues[i] = (
-            Weight[i]
-            + (1 / FSGuess)
-            * PoreWaterForce[i]
-            * np.tan(np.radians(phi[i]))
-            * np.sin(np.radians(ThetaAvr[i]))
-            - (1 / FSGuess) * c[i] * A[i] * np.sin(np.radians(ThetaAvr[i]))
-        ) / (
-            np.cos(np.radians(Theta[i]))
-            + (1 / FSGuess)
-            * np.tan(np.radians(phi[i]))
-            * np.sin(np.radians(ThetaAvr[i]))
-        )
+        NValues[i] = (Weight[i] + (1 / FSGuess) * PoreWaterForce[i] * np.tan(np.radians(phi[i])) * np.sin(np.radians(ThetaAvr[i])) - (1 / FSGuess) * c[i] * A[i] * np.sin(np.radians(ThetaAvr[i]))) / (np.cos(np.radians(Theta[i])) + (1 / FSGuess) * np.tan(np.radians(phi[i])) * np.sin(np.radians(ThetaAvr[i])))
         # NValues[i] = (0 if NValues[i] < 0 else NValues[i] )
-        ResCal[i] = (
-            c[i] * A[i] + (NValues[i] - PoreWaterForce[i]) * np.tan(np.radians(phi[i]))
-        ) * np.cos(np.radians(ThetaAvr[i]))
-        Drical[i] = (
-            np.sign(AngleTangentXZE1[i])
-            * (NValues[i] * np.cos(np.radians(Theta[i])))
-            * np.tan(np.radians(ThetaAvr[i]))
-        )
+        ResCal[i] = (c[i] * A[i] + (NValues[i] - PoreWaterForce[i]) * np.tan(np.radians(phi[i]))) * np.cos(np.radians(ThetaAvr[i]))
+        Drical[i] = np.sign(AngleTangentXZE1[i]) * (NValues[i] * np.cos(np.radians(Theta[i]))) * np.tan(np.radians(ThetaAvr[i]))
         # Drical[i] = ((NValues[i]*np.cos(np.radians(Theta[i]))) * np.tan(np.radians(ThetaAvr[i])))
 
     ## Calculate FC
@@ -1502,22 +1288,7 @@ def FSJanbu3D(x, *DataFunction):
 
 
 # ---------------------------------------------------------------------------------
-def Par_Fields(
-    Parameter_Means,
-    Parameter_CoVs,
-    Parameter_Dist,
-    Parameter_CorrLenX,
-    Parameter_CorrLenY,
-    nrows,
-    ncols,
-    cellsize,
-    RanFieldMethod,
-    ZoneInput,
-    Maxrix_Directory,
-    NoData=-9999,
-    SaveMat="NO",
-    *args
-):
+def Par_Fields(Parameter_Means, Parameter_CoVs, Parameter_Dist, Parameter_CorrLenX, Parameter_CorrLenY, nrows, ncols, cellsize, RanFieldMethod, ZoneInput, Maxrix_Directory, NoData=-9999, SaveMat="NO", *args):
     """
     This function generated random fields for given parameters for multiple soil types.
 
@@ -1583,26 +1354,11 @@ def Par_Fields(
         ## "HomVariable": CoV is not zero and correlation length is infinite
         ## "SpaVariable": CoV is not zoro and correlation length is not infinite
         ZoneInd_NotVariable = np.where(Parameter_CoVs[i] == 0)[1]
-        ZoneInd_HomVariable = np.where(
-            (
-                (Parameter_CoVs[i] != 0)
-                & ((Parameter_CorrLenX[i] == "inf") | (Parameter_CorrLenY[i] == "inf"))
-            )
-        )[1]
-        ZoneInd_SpaVariable = np.where(
-            (
-                (Parameter_CoVs[i] != 0)
-                & ((Parameter_CorrLenX[i] != "inf") & (Parameter_CorrLenY[i] != "inf"))
-            )
-        )[1]
+        ZoneInd_HomVariable = np.where(((Parameter_CoVs[i] != 0) & ((Parameter_CorrLenX[i] == "inf") | (Parameter_CorrLenY[i] == "inf"))))[1]
+        ZoneInd_SpaVariable = np.where(((Parameter_CoVs[i] != 0) & ((Parameter_CorrLenX[i] != "inf") & (Parameter_CorrLenY[i] != "inf"))))[1]
 
         ## If there is inconsistency in the zone count, print error!
-        if (
-            np.shape(ZoneInd_NotVariable)[0]
-            + np.shape(ZoneInd_HomVariable)[0]
-            + np.shape(ZoneInd_SpaVariable)[0]
-            != np.shape(ZoneNumber)[0]
-        ):
+        if np.shape(ZoneInd_NotVariable)[0] + np.shape(ZoneInd_HomVariable)[0] + np.shape(ZoneInd_SpaVariable)[0] != np.shape(ZoneNumber)[0]:
             print("Problem in Par_Fields function!")
 
         ## Assign parmeter values for "NotVariable" zones
@@ -1610,9 +1366,7 @@ def Par_Fields(
             # print(CurrentZoneIndex)
             CurrentZoneNumber = ZoneNumber[CurrentZoneIndex]
             ## Assign constant parameter value to the corresponding cells
-            Parameter_Fields[i][ZoneInput == CurrentZoneNumber] = Parameter_Means[
-                i, 0, CurrentZoneIndex
-            ]
+            Parameter_Fields[i][ZoneInput == CurrentZoneNumber] = Parameter_Means[i, 0, CurrentZoneIndex]
 
         ## Assign parmeter values for "HomVariable" zones
         for CurrentZoneIndex in ZoneInd_HomVariable:
@@ -1624,18 +1378,13 @@ def Par_Fields(
                 # np.random.seed(2021+args[0]) ### For testing (Shared array change)
                 RandomValue = np.random.normal(
                     Parameter_Means[i, 0, CurrentZoneIndex],
-                    Parameter_Means[i, 0, CurrentZoneIndex]
-                    * Parameter_CoVs[i, 0, CurrentZoneIndex],
+                    Parameter_Means[i, 0, CurrentZoneIndex] * Parameter_CoVs[i, 0, CurrentZoneIndex],
                 )
 
             elif Parameter_Dist[i, 0, CurrentZoneIndex] == "LN":
                 # Parameters of the underlying normal distribution
-                SigLnPar = np.sqrt(
-                    np.log(1 + Parameter_CoVs[i, 0, CurrentZoneIndex] ** 2)
-                )
-                MuLnPar = (
-                    np.log(Parameter_Means[i, 0, CurrentZoneIndex]) - 0.5 * SigLnPar**2
-                )
+                SigLnPar = np.sqrt(np.log(1 + Parameter_CoVs[i, 0, CurrentZoneIndex] ** 2))
+                MuLnPar = np.log(Parameter_Means[i, 0, CurrentZoneIndex]) - 0.5 * SigLnPar**2
                 ## Draw samples from a log-normal distribution.
                 # np.random.seed(2021+args[0]) ### For testing (Shared array change)
                 RandomValue = np.random.lognormal(MuLnPar, SigLnPar)
@@ -1687,9 +1436,7 @@ def Par_Fields(
                 )
 
             ## Assign spatially variable parameter values to the corresponding cells
-            Parameter_Fields[i][ZoneInput == CurrentZoneNumber] = FieldData[
-                ZoneInput == CurrentZoneNumber
-            ]
+            Parameter_Fields[i][ZoneInput == CurrentZoneNumber] = FieldData[ZoneInput == CurrentZoneNumber]
 
         # ## See the plot
         # # os.chdir(Results_Directory)
@@ -1761,40 +1508,7 @@ def Zmax_Variable(SlopeInput, CoV_Zmax, MinZmax, nrows, ncols, cellsize, NoData)
 
 
 # ---------------------------------------------------------------------------------
-def FSCalcEllipsoid_v1_0_SingleRrocess(
-    AnalysisType,
-    FSCalType,
-    RanFieldMethod,
-    InZone,
-    SubDisNum,
-    Results_Directory,
-    Code_Directory,
-    Maxrix_Directory,
-    nrows,
-    ncols,
-    nel,
-    cellsize,
-    EllParam,
-    MCnumber,
-    Parameter_Means,
-    Parameter_CoVs,
-    Parameter_Dist,
-    Parameter_CorrLenX,
-    Parameter_CorrLenY,
-    SaveMat,
-    ZoneInput,
-    SlopeInput,
-    ZmaxArg,
-    ZmaxInput,
-    DEMInput,
-    HwInput,
-    rizeroInput,
-    riInp,
-    AspectInput,
-    TimeToAnalyse,
-    NoData,
-    ProblemName="",
-):
+def FSCalcEllipsoid_v1_0_SingleRrocess(AnalysisType, FSCalType, RanFieldMethod, InZone, SubDisNum, Results_Directory, Code_Directory, Maxrix_Directory, nrows, ncols, nel, cellsize, EllParam, MCnumber, Parameter_Means, Parameter_CoVs, Parameter_Dist, Parameter_CorrLenX, Parameter_CorrLenY, SaveMat, ZoneInput, SlopeInput, ZmaxArg, ZmaxInput, DEMInput, HwInput, rizeroInput, riInp, AspectInput, TimeToAnalyse, NoData, ProblemName=""):
     """
     ## This is the main function in which the calculations are done with single processor.
     ## Many other functions are called and used inside this function.
@@ -1903,15 +1617,11 @@ def FSCalcEllipsoid_v1_0_SingleRrocess(
 
         ## In case of having variable Zmax in the probabilistic analysis
         if ZmaxArg[0] == "YES":  ## ZmaxArg = (ZmaxVar, CoV_Zmax, MinZmax)
-            ZmaxInput = Zmax_Variable(
-                SlopeInput, ZmaxArg[1], ZmaxArg[2], nrows, ncols, cellsize, NoData
-            )
+            ZmaxInput = Zmax_Variable(SlopeInput, ZmaxArg[1], ZmaxArg[2], nrows, ncols, cellsize, NoData)
 
         # ## Allocate FS
         # TempLst = {i:[] for i in list(range(0,nrows*ncols))}
-        FS_All_MC = [0] * (
-            np.shape(TimeToAnalyse)[0] * nrows * ncols
-        )  ### (Shared array change)
+        FS_All_MC = [0] * (np.shape(TimeToAnalyse)[0] * nrows * ncols)  ### (Shared array change)
 
         """
         ## It is possible to generate an ellipsoidal sliding surface at any cell given.
@@ -1975,9 +1685,7 @@ def FSCalcEllipsoid_v1_0_SingleRrocess(
 
         FS_All_MC_InZone = np.asarray(FS_All_MC)
         # FS_All_MC_InZone = np.reshape(FS_All_MC_InZone, (np.shape(TimeToAnalyse)[0],MCnumber,nrows,ncols)) ### (Shared array change)
-        FS_All_MC_InZone = np.reshape(
-            FS_All_MC_InZone, (np.shape(TimeToAnalyse)[0], nrows, ncols)
-        )  ### (Shared array change)
+        FS_All_MC_InZone = np.reshape(FS_All_MC_InZone, (np.shape(TimeToAnalyse)[0], nrows, ncols))  ### (Shared array change)
 
         ## Write FS for the current MC simulation
         os.chdir(Results_Directory)
@@ -1989,42 +1697,7 @@ def FSCalcEllipsoid_v1_0_SingleRrocess(
 
 # ---------------------------------------------------------------------------------
 def FSCalcEllipsoid_v1_0_MutiProcess(
-    Multiprocessing_Option,
-    TOTAL_PROCESSES_MC,
-    TOTAL_PROCESSES_ELL,
-    TOTAL_THREADS_ELL,
-    AnalysisType,
-    FSCalType,
-    RanFieldMethod,
-    InZone,
-    SubDisNum,
-    Results_Directory,
-    Code_Directory,
-    Maxrix_Directory,
-    nrows,
-    ncols,
-    nel,
-    cellsize,
-    EllParam,
-    MCnumber,
-    Parameter_Means,
-    Parameter_CoVs,
-    Parameter_Dist,
-    Parameter_CorrLenX,
-    Parameter_CorrLenY,
-    SaveMat,
-    ZoneInput,
-    SlopeInput,
-    ZmaxArg,
-    ZmaxInput,
-    DEMInput,
-    HwInput,
-    rizeroInput,
-    riInp,
-    AspectInput,
-    TimeToAnalyse,
-    NoData,
-    ProblemName="",
+    Multiprocessing_Option, TOTAL_PROCESSES_MC, TOTAL_PROCESSES_ELL, TOTAL_THREADS_ELL, AnalysisType, FSCalType, RanFieldMethod, InZone, SubDisNum, Results_Directory, Code_Directory, Maxrix_Directory, nrows, ncols, nel, cellsize, EllParam, MCnumber, Parameter_Means, Parameter_CoVs, Parameter_Dist, Parameter_CorrLenX, Parameter_CorrLenY, SaveMat, ZoneInput, SlopeInput, ZmaxArg, ZmaxInput, DEMInput, HwInput, rizeroInput, riInp, AspectInput, TimeToAnalyse, NoData, ProblemName=""
 ):
     """
     ## This is the main function in which the calculations are done with multiple processor.
@@ -2282,42 +1955,7 @@ def FSCalcEllipsoid_v1_0_MutiProcess(
 
 
 # ---------------------------------------------------------------------------------
-def MCRun_v1_0_SingleProcess(
-    queue_mc,
-    FS_All_MC,
-    AnalysisType,
-    FSCalType,
-    RanFieldMethod,
-    InZone,
-    SubDisNum,
-    Results_Directory,
-    Code_Directory,
-    Maxrix_Directory,
-    nrows,
-    ncols,
-    nel,
-    cellsize,
-    EllParam,
-    MCnumber,
-    Parameter_Means,
-    Parameter_CoVs,
-    Parameter_Dist,
-    Parameter_CorrLenX,
-    Parameter_CorrLenY,
-    SaveMat,
-    ZoneInput,
-    SlopeInput,
-    ZmaxArg,
-    ZmaxInput,
-    DEMInput,
-    HwInput,
-    rizeroInput,
-    riInp,
-    AspectInput,
-    TimeToAnalyse,
-    NoData,
-    ProblemName="",
-):
+def MCRun_v1_0_SingleProcess(queue_mc, FS_All_MC, AnalysisType, FSCalType, RanFieldMethod, InZone, SubDisNum, Results_Directory, Code_Directory, Maxrix_Directory, nrows, ncols, nel, cellsize, EllParam, MCnumber, Parameter_Means, Parameter_CoVs, Parameter_Dist, Parameter_CorrLenX, Parameter_CorrLenY, SaveMat, ZoneInput, SlopeInput, ZmaxArg, ZmaxInput, DEMInput, HwInput, rizeroInput, riInp, AspectInput, TimeToAnalyse, NoData, ProblemName=""):
     """
     Monte Carlo simulations with single processor.
     This is a main function before actual function in which the calculations are performed.
@@ -2492,15 +2130,11 @@ def MCRun_v1_0_SingleProcess(
 
         ## In case of having variable Zmax in the probabilistic analysis
         if ZmaxArg[0] == "YES":  ## ZmaxArg = (ZmaxVar, CoV_Zmax, MinZmax)
-            ZmaxInput = Zmax_Variable(
-                SlopeInput, ZmaxArg[1], ZmaxArg[2], nrows, ncols, cellsize, NoData
-            )
+            ZmaxInput = Zmax_Variable(SlopeInput, ZmaxArg[1], ZmaxArg[2], nrows, ncols, cellsize, NoData)
 
         ## Allocate FS
         # TempLst = {i:[] for i in list(range(0,nrows*ncols))}
-        FS_All_MC = [0] * (
-            np.shape(TimeToAnalyse)[0] * nrows * ncols
-        )  ### (Shared array change)
+        FS_All_MC = [0] * (np.shape(TimeToAnalyse)[0] * nrows * ncols)  ### (Shared array change)
 
         """
         ## It is possible to generate an ellipsoidal sliding surface at any cell given.
@@ -2557,9 +2191,7 @@ def MCRun_v1_0_SingleProcess(
         # print("Terminates in %f. min " %((t2-t1)/60))
 
         FS_All_MC_InZone = np.asarray(FS_All_MC)
-        FS_All_MC_InZone = np.reshape(
-            FS_All_MC_InZone, (np.shape(TimeToAnalyse)[0], nrows, ncols)
-        )  ### (Shared array change)
+        FS_All_MC_InZone = np.reshape(FS_All_MC_InZone, (np.shape(TimeToAnalyse)[0], nrows, ncols))  ### (Shared array change)
 
         ## Write FS for the current MC simulation
         os.chdir(Results_Directory)
@@ -2572,43 +2204,7 @@ def MCRun_v1_0_SingleProcess(
 
 
 # ---------------------------------------------------------------------------------
-def MCRun_v1_0_MultiProcess(
-    queue_mc,
-    FS_All_MC,
-    TOTAL_PROCESSES_ELL,
-    AnalysisType,
-    FSCalType,
-    RanFieldMethod,
-    InZone,
-    SubDisNum,
-    Results_Directory,
-    Code_Directory,
-    Maxrix_Directory,
-    nrows,
-    ncols,
-    nel,
-    cellsize,
-    EllParam,
-    MCnumber,
-    Parameter_Means,
-    Parameter_CoVs,
-    Parameter_Dist,
-    Parameter_CorrLenX,
-    Parameter_CorrLenY,
-    SaveMat,
-    ZoneInput,
-    SlopeInput,
-    ZmaxArg,
-    ZmaxInput,
-    DEMInput,
-    HwInput,
-    rizeroInput,
-    riInp,
-    AspectInput,
-    TimeToAnalyse,
-    NoData,
-    ProblemName="",
-):
+def MCRun_v1_0_MultiProcess(queue_mc, FS_All_MC, TOTAL_PROCESSES_ELL, AnalysisType, FSCalType, RanFieldMethod, InZone, SubDisNum, Results_Directory, Code_Directory, Maxrix_Directory, nrows, ncols, nel, cellsize, EllParam, MCnumber, Parameter_Means, Parameter_CoVs, Parameter_Dist, Parameter_CorrLenX, Parameter_CorrLenY, SaveMat, ZoneInput, SlopeInput, ZmaxArg, ZmaxInput, DEMInput, HwInput, rizeroInput, riInp, AspectInput, TimeToAnalyse, NoData, ProblemName=""):
     """
     Monte Carlo simulations with multiple processor.
     This is a main function before actual function in which the calculations are performed.
@@ -2788,15 +2384,11 @@ def MCRun_v1_0_MultiProcess(
 
         ## In case of having variable Zmax in the probabilistic analysis
         if ZmaxArg[0] == "YES":  ## ZmaxArg = (ZmaxVar, CoV_Zmax, MinZmax)
-            ZmaxInput = Zmax_Variable(
-                SlopeInput, ZmaxArg[1], ZmaxArg[2], nrows, ncols, cellsize, NoData
-            )
+            ZmaxInput = Zmax_Variable(SlopeInput, ZmaxArg[1], ZmaxArg[2], nrows, ncols, cellsize, NoData)
 
         ## Allocate FS
         # TempLst = {i:[] for i in list(range(0,nrows*ncols))}
-        FS_All_MC = Array(
-            "d", [0] * (np.shape(TimeToAnalyse)[0] * nrows * ncols), lock=True
-        )  ### (Shared array change)
+        FS_All_MC = Array("d", [0] * (np.shape(TimeToAnalyse)[0] * nrows * ncols), lock=True)  ### (Shared array change)
 
         """
         ## It is possible to generate an ellipsoidal sliding surface at any cell given.
@@ -2858,9 +2450,7 @@ def MCRun_v1_0_MultiProcess(
                 p_ell.join()  ## For Processes
 
         FS_All_MC_InZone = np.asarray(FS_All_MC)
-        FS_All_MC_InZone = np.reshape(
-            FS_All_MC_InZone, (np.shape(TimeToAnalyse)[0], nrows, ncols)
-        )  ### (Shared array change)
+        FS_All_MC_InZone = np.reshape(FS_All_MC_InZone, (np.shape(TimeToAnalyse)[0], nrows, ncols))  ### (Shared array change)
 
         ## Write FS for the current MC simulation
         os.chdir(Results_Directory)
@@ -2873,43 +2463,7 @@ def MCRun_v1_0_MultiProcess(
 
 
 # ---------------------------------------------------------------------------------
-def MCRun_v1_0_MultiThread(
-    queue_mc,
-    FS_All_MC,
-    TOTAL_THREADS_ELL,
-    AnalysisType,
-    FSCalType,
-    RanFieldMethod,
-    InZone,
-    SubDisNum,
-    Results_Directory,
-    Code_Directory,
-    Maxrix_Directory,
-    nrows,
-    ncols,
-    nel,
-    cellsize,
-    EllParam,
-    MCnumber,
-    Parameter_Means,
-    Parameter_CoVs,
-    Parameter_Dist,
-    Parameter_CorrLenX,
-    Parameter_CorrLenY,
-    SaveMat,
-    ZoneInput,
-    SlopeInput,
-    ZmaxArg,
-    ZmaxInput,
-    DEMInput,
-    HwInput,
-    rizeroInput,
-    riInp,
-    AspectInput,
-    TimeToAnalyse,
-    NoData,
-    ProblemName="",
-):
+def MCRun_v1_0_MultiThread(queue_mc, FS_All_MC, TOTAL_THREADS_ELL, AnalysisType, FSCalType, RanFieldMethod, InZone, SubDisNum, Results_Directory, Code_Directory, Maxrix_Directory, nrows, ncols, nel, cellsize, EllParam, MCnumber, Parameter_Means, Parameter_CoVs, Parameter_Dist, Parameter_CorrLenX, Parameter_CorrLenY, SaveMat, ZoneInput, SlopeInput, ZmaxArg, ZmaxInput, DEMInput, HwInput, rizeroInput, riInp, AspectInput, TimeToAnalyse, NoData, ProblemName=""):
     """
     Monte Carlo simulations with multiple threads.
     This is a main function before actual function in which the calculations are performed.
@@ -3086,15 +2640,11 @@ def MCRun_v1_0_MultiThread(
 
         ## In case of having variable Zmax in the probabilistic analysis
         if ZmaxArg[0] == "YES":  ## ZmaxArg = (ZmaxVar, CoV_Zmax, MinZmax)
-            ZmaxInput = Zmax_Variable(
-                SlopeInput, ZmaxArg[1], ZmaxArg[2], nrows, ncols, cellsize, NoData
-            )
+            ZmaxInput = Zmax_Variable(SlopeInput, ZmaxArg[1], ZmaxArg[2], nrows, ncols, cellsize, NoData)
 
         ## Allocate FS  ### (Shared array change)
         # FS_All_MC = Array('d', [0]*(np.shape(TimeToAnalyse)[0] * nrows * ncols), lock=True)   ### (Shared array change)
-        FS_All_MC = [0] * (
-            np.shape(TimeToAnalyse)[0] * nrows * ncols
-        )  ### (Shared array change)
+        FS_All_MC = [0] * (np.shape(TimeToAnalyse)[0] * nrows * ncols)  ### (Shared array change)
         """
         ## It is possible to generate an ellipsoidal sliding surface at any cell given.
         ## Note: If an ellipsoidal sliding surface is truncated by the boundary of the problem domain, the results will be misleading.
@@ -3155,9 +2705,7 @@ def MCRun_v1_0_MultiThread(
                 t_ell.join()  ## For threads
 
         FS_All_MC_InZone = np.asarray(FS_All_MC)
-        FS_All_MC_InZone = np.reshape(
-            FS_All_MC_InZone, (np.shape(TimeToAnalyse)[0], nrows, ncols)
-        )  ### (Shared array change)
+        FS_All_MC_InZone = np.reshape(FS_All_MC_InZone, (np.shape(TimeToAnalyse)[0], nrows, ncols))  ### (Shared array change)
 
         ## Write FS for the current MC simulation
         os.chdir(Results_Directory)
@@ -3170,32 +2718,7 @@ def MCRun_v1_0_MultiThread(
 
 
 # ---------------------------------------------------------------------------------
-def EllipsoidFSWithSubDis_v1_0_SingleProcess(
-    FS_All_MC,
-    MC_current,
-    MCnumber,
-    AnalysisType,
-    FSCalType,
-    SubDisNum,
-    nrows,
-    ncols,
-    nel,
-    cellsize,
-    Parameter_Fields,
-    EllParam,
-    EllRow,
-    EllColumn,
-    SlopeInput,
-    ZmaxInput,
-    DEMInput,
-    HwInput,
-    rizeroInput,
-    riInp,
-    AspectInput,
-    TimeToAnalyse,
-    NoData,
-    ProblemName="",
-):
+def EllipsoidFSWithSubDis_v1_0_SingleProcess(FS_All_MC, MC_current, MCnumber, AnalysisType, FSCalType, SubDisNum, nrows, ncols, nel, cellsize, Parameter_Fields, EllParam, EllRow, EllColumn, SlopeInput, ZmaxInput, DEMInput, HwInput, rizeroInput, riInp, AspectInput, TimeToAnalyse, NoData, ProblemName=""):
     """
     This function calculates the factor of safety by assuming an ellipsoidal shape, and used in single processor function.
 
@@ -3300,12 +2823,8 @@ def EllipsoidFSWithSubDis_v1_0_SingleProcess(
 
     ## Ellipsoidal parameters
     ## Global coordinates based on EllRow, EllColumn
-    temp = CoorG[
-        np.ix_(CoorG[:, 0] == np.array((EllRow)), np.array([False, True, True, True]))
-    ]
-    temp = temp[
-        np.ix_(temp[:, 0] == np.array((EllColumn)), np.array([False, True, True]))
-    ]
+    temp = CoorG[np.ix_(CoorG[:, 0] == np.array((EllRow)), np.array([False, True, True, True]))]
+    temp = temp[np.ix_(temp[:, 0] == np.array((EllColumn)), np.array([False, True, True]))]
     ## Coordinates accotding to the global
     EllCenterX = temp[0][0]
     EllCenterY = temp[0][1]
@@ -3340,12 +2859,8 @@ def EllipsoidFSWithSubDis_v1_0_SingleProcess(
     elif EllAlpha_Calc == "No":
         EllAlpha = EllParam[3]
 
-    x1 = CoorEll[:, 2] * np.cos(np.radians(EllAlpha)) - CoorEll[:, 3] * np.sin(
-        np.radians(EllAlpha)
-    )
-    y1 = CoorEll[:, 3] * np.cos(np.radians(EllAlpha)) + CoorEll[:, 2] * np.sin(
-        np.radians(EllAlpha)
-    )
+    x1 = CoorEll[:, 2] * np.cos(np.radians(EllAlpha)) - CoorEll[:, 3] * np.sin(np.radians(EllAlpha))
+    y1 = CoorEll[:, 3] * np.cos(np.radians(EllAlpha)) + CoorEll[:, 2] * np.sin(np.radians(EllAlpha))
     ## Coordinates according to the ellipsoid coordinate system, e'(e rotated by EllAlpha)
     CoorEll1 = np.concatenate(
         (
@@ -3356,23 +2871,15 @@ def EllipsoidFSWithSubDis_v1_0_SingleProcess(
         axis=1,
     )
     ## Cells inside the zone of rectangle with the dimensions of (2*Ella – 2* Ellb)
-    CellsInsideRect = CoorEll1[
-        (np.abs(CoorEll1[:, 2]) <= Ella) & (np.abs(CoorEll1[:, 3]) <= Ellb)
-    ]
+    CellsInsideRect = CoorEll1[(np.abs(CoorEll1[:, 2]) <= Ella) & (np.abs(CoorEll1[:, 3]) <= Ellb)]
     ## Slope of the ellipsoid is the average slope around the ellipsoid (a rectangular area)
-    SlopeRect = SlopeInput[
-        CellsInsideRect[:, 0].astype(int), CellsInsideRect[:, 1].astype(int)
-    ]
+    SlopeRect = SlopeInput[CellsInsideRect[:, 0].astype(int), CellsInsideRect[:, 1].astype(int)]
     SlopeRect = SlopeRect[SlopeRect != NoData]  # Remove the value of no data, NoData
     EllBeta = np.mean(SlopeRect)
 
     ##!!!
     ##This part is for validation problem 3
-    if (
-        ProblemName == "Pr3S1Dry"
-        or ProblemName == "Pr3S2Dry"
-        or ProblemName == "Pr3S2Wet"
-    ):
+    if ProblemName == "Pr3S1Dry" or ProblemName == "Pr3S2Dry" or ProblemName == "Pr3S2Wet":
         EllBeta = np.degrees(np.arctan(0.5))
     ##!!!
 
@@ -3428,11 +2935,7 @@ def EllipsoidFSWithSubDis_v1_0_SingleProcess(
     Depths = np.reshape(Depths, (np.shape(CellsInside)[0], 1))
     Depths[np.isnan(Depths)] = 0
     ## DEM of the sliding surface
-    DepthDEM = EllDEMCenter - (
-        np.reshape(CellsInside[:, 2], (np.shape(CellsInside)[0], 1))
-        * np.tan(np.radians(EllBeta))
-        + Depths
-    )
+    DepthDEM = EllDEMCenter - (np.reshape(CellsInside[:, 2], (np.shape(CellsInside)[0], 1)) * np.tan(np.radians(EllBeta)) + Depths)
 
     ##!!!
     ##This part is for validation problem 2
@@ -3441,10 +2944,7 @@ def EllipsoidFSWithSubDis_v1_0_SingleProcess(
         SlopeInput2[: int(0.58 / cellsize) + 1] = SlopeInput[1, 1]
         DEMInput2 = np.zeros((nrows))
         for i in range(nrows - 1):
-            DEMInput2[i + 1] = DEMInput2[i] + +(
-                cellsize / 2 * np.tan(np.radians(SlopeInput2[i]))
-                + cellsize / 2 * np.tan(np.radians(SlopeInput2[i + 1]))
-            )
+            DEMInput2[i + 1] = DEMInput2[i] + +(cellsize / 2 * np.tan(np.radians(SlopeInput2[i])) + cellsize / 2 * np.tan(np.radians(SlopeInput2[i + 1])))
         DEMInput2 = DEMInput2 + cellsize / 2 * np.tan(np.radians(SlopeInput[1, 1]))
         DEMInput2 = DEMInput2[::-1]
         DEMInput2 = np.transpose([DEMInput2] * ncols)
@@ -3512,9 +3012,7 @@ def EllipsoidFSWithSubDis_v1_0_SingleProcess(
                         (nrows - 1) * cellsize + cellsize / 2 - i * cellsize,
                     ]
                 )
-        CoorG_new = np.asarray(
-            CoorG_new
-        )  # (row #, column #, x coordinate, y coordinate)
+        CoorG_new = np.asarray(CoorG_new)  # (row #, column #, x coordinate, y coordinate)
 
         ## Follow the index numbers
         IndexTemp = np.kron(IndexTemp, np.ones((2, 2)))
@@ -3539,9 +3037,7 @@ def EllipsoidFSWithSubDis_v1_0_SingleProcess(
         ZmaxInput = np.kron(ZmaxInput, np.ones((2, 2)))  ## Zmax input
         DEMInput = np.kron(DEMInput, np.ones((2, 2)))  ## DEM input
         HwInput = np.kron(HwInput, np.ones((2, 2)))  ## Ground water table input
-        rizeroInput = np.kron(
-            rizeroInput, np.ones((2, 2))
-        )  ## Background infiltration rate input
+        rizeroInput = np.kron(rizeroInput, np.ones((2, 2)))  ## Background infiltration rate input
 
         ## Linear interpolation
         # ## Slope input
@@ -3584,9 +3080,7 @@ def EllipsoidFSWithSubDis_v1_0_SingleProcess(
             #             + cellsize / 2 * np.tan(np.radians(SlopeInput[j, i]))
             #         )
             # DEMInput = DEMInput + 50  # I added but no need.
-            DEMInput = Calculate_DEM_SimpCase(
-                DEMInput, SlopeInput, nrows_org, nrows, ncols, cellsize
-            )
+            DEMInput = Calculate_DEM_SimpCase(DEMInput, SlopeInput, nrows_org, nrows, ncols, cellsize)
         ### !!!
 
         ## Determine the cell inside the ellipsoid
@@ -3609,9 +3103,7 @@ def EllipsoidFSWithSubDis_v1_0_SingleProcess(
             Ellc,
             Ellz,
         )
-        CellsInside[np.abs(CellsInside) < 1e-10] = (
-            0  ## correction to the very low values
-        )
+        CellsInside[np.abs(CellsInside) < 1e-10] = 0  ## correction to the very low values
 
         ## Calculate the depth at a given cell
         ## If the DEM of the cell is lower than the DEM of the sliding surface, it is removed.
@@ -3630,17 +3122,11 @@ def EllipsoidFSWithSubDis_v1_0_SingleProcess(
         Depths = np.reshape(Depths, (np.shape(CellsInside)[0], 1))
         Depths[np.isnan(Depths)] = 0
         ## DEM of the sliding surface
-        DepthDEM = EllDEMCenter - (
-            np.reshape(CellsInside[:, 2], (np.shape(CellsInside)[0], 1))
-            * np.tan(np.radians(EllBeta))
-            + Depths
-        )
+        DepthDEM = EllDEMCenter - (np.reshape(CellsInside[:, 2], (np.shape(CellsInside)[0], 1)) * np.tan(np.radians(EllBeta)) + Depths)
         # DEMdiff = (DEMInput[(int(CellsInside[i,0]),int(CellsInside[i,1]))] - DepthDEM[i,0])
         DEMdiff = (
             np.reshape(
-                DEMInput[
-                    (CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))
-                ],
+                DEMInput[(CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))],
                 (np.shape(CellsInside)[0], 1),
             )
             - DepthDEM
@@ -3684,8 +3170,7 @@ def EllipsoidFSWithSubDis_v1_0_SingleProcess(
 
     ## Coordinate according to the e'' coordinate system (center of ellipsoid)
     xvalues = np.reshape(
-        CellsInside[:, 2] / np.cos(np.radians(EllBeta))
-        + Depths[:, 0] * np.sin(np.radians(EllBeta)),
+        CellsInside[:, 2] / np.cos(np.radians(EllBeta)) + Depths[:, 0] * np.sin(np.radians(EllBeta)),
         (np.shape(CellsInside)[0], 1),
     )
     yvalues = np.reshape(CellsInside[:, 3], (np.shape(CellsInside)[0], 1))
@@ -3697,9 +3182,7 @@ def EllipsoidFSWithSubDis_v1_0_SingleProcess(
     # zvalues2 = np.reshape( Depths[:,0]  * np.cos(np.radians(EllBeta)) + Ellz  , (np.shape(CellsInside)[0],1) )
 
     ## Cells inside according to e'' coordinate system
-    CellsInsideE11 = np.concatenate(
-        (CellsInside[:, 0:2], xvalues, yvalues, zvalues), axis=1
-    )
+    CellsInsideE11 = np.concatenate((CellsInside[:, 0:2], xvalues, yvalues, zvalues), axis=1)
 
     ## Gradient According to e''
     GradientsE11 = []  ## Allocate
@@ -3774,13 +3257,9 @@ def EllipsoidFSWithSubDis_v1_0_SingleProcess(
     """
     # Transform the vector to the e' coordinate system
     GradientsE1 = np.zeros(((np.shape(CellsInside)[0], 3)))
-    GradientsE1[:, 0] = GradientsE11[:, 0] * np.cos(np.radians(EllBeta)) + GradientsE11[
-        :, 2
-    ] * np.sin(np.radians(EllBeta))
+    GradientsE1[:, 0] = GradientsE11[:, 0] * np.cos(np.radians(EllBeta)) + GradientsE11[:, 2] * np.sin(np.radians(EllBeta))
     GradientsE1[:, 1] = GradientsE11[:, 1]
-    GradientsE1[:, 2] = -GradientsE11[:, 0] * np.sin(
-        np.radians(EllBeta)
-    ) + GradientsE11[:, 2] * np.cos(np.radians(EllBeta))
+    GradientsE1[:, 2] = -GradientsE11[:, 0] * np.sin(np.radians(EllBeta)) + GradientsE11[:, 2] * np.cos(np.radians(EllBeta))
 
     # ## Angle between normal vector and x' axis on XZ' plane
     # n = np.array((GradientsE1[:,0],GradientsE1[:,2])).T
@@ -3810,9 +3289,7 @@ def EllipsoidFSWithSubDis_v1_0_SingleProcess(
 
     ## Calculation of Theta (Dip angle)
     ## Angle between 3D normal vector and Z' axis.
-    n = np.array(
-        (GradientsE1Minus[:, 0], GradientsE1Minus[:, 1], GradientsE1Minus[:, 2])
-    ).T
+    n = np.array((GradientsE1Minus[:, 0], GradientsE1Minus[:, 1], GradientsE1Minus[:, 2])).T
     vx11 = np.array([0.0, 0.0, 1.0])
     uvx11 = vx11 / np.linalg.norm(vx11)
     AngleNormal3DWE1 = []  ## Allocate. It will be assigned to Theta below.
@@ -3856,19 +3333,7 @@ def EllipsoidFSWithSubDis_v1_0_SingleProcess(
     ## Calculation of the area by using the formulation given in Xie's or Hungr's papers.
     A = []  ## Allocate
     for i in range(np.shape(CellsInside)[0]):
-        A.append(
-            (cellsize**2)
-            * (
-                (
-                    np.sqrt(
-                        1
-                        - ((np.sin(np.radians(Tanyz[i]))) ** 2)
-                        * ((np.sin(np.radians((Tanxz[i])))) ** 2)
-                    )
-                )
-            )
-            / (((np.cos(np.radians((Tanyz[i]))))) * ((np.cos(np.radians((Tanxz[i]))))))
-        )
+        A.append((cellsize**2) * ((np.sqrt(1 - ((np.sin(np.radians(Tanyz[i]))) ** 2) * ((np.sin(np.radians((Tanxz[i])))) ** 2)))) / (((np.cos(np.radians((Tanyz[i]))))) * ((np.cos(np.radians((Tanxz[i])))))))
     A = np.asarray(A)
     A = np.reshape(A, (np.shape(CellsInside)[0], 1))
 
@@ -3941,18 +3406,14 @@ def EllipsoidFSWithSubDis_v1_0_SingleProcess(
     ## Weight is recalculated.
     for i in condzmax:
         # print(i)
-        Weight[i] = (
-            ZmaxInput[indexes][i] * cellsize**2 * Gamma.flatten()[indexes][i]
-        )  ## Weight
+        Weight[i] = ZmaxInput[indexes][i] * cellsize**2 * Gamma.flatten()[indexes][i]  ## Weight
 
     # Reshape and truncate to the slope of the current cell
     ThetaAvr = np.reshape(ThetaAvr, (np.shape(CellsInside)[0], 1))
     Theta = np.reshape(Theta, (np.shape(CellsInside)[0], 1))
     AngleTangentXZE1 = np.reshape(AngleTangentXZE1, (np.shape(CellsInside)[0], 1))
 
-    TempSlope = SlopeInput[
-        (CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))
-    ].T[condzmax]
+    TempSlope = SlopeInput[(CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))].T[condzmax]
     ThetaAvr[condzmax] = np.reshape(TempSlope, (np.shape(TempSlope)[0], 1))
     Theta[condzmax] = np.reshape(TempSlope, (np.shape(TempSlope)[0], 1))
     AngleTangentXZE1[condzmax] = np.reshape(TempSlope, (np.shape(TempSlope)[0], 1))
@@ -4020,18 +3481,11 @@ def EllipsoidFSWithSubDis_v1_0_SingleProcess(
         )
     elif AnalysisType == "Undrained":
         # PoreWaterForce = np.zeros((np.shape(CellsInside)[0],1))
-        PoreWaterForce = [np.zeros((np.shape(CellsInside)[0], 1))] * np.shape(
-            TimeToAnalyse
-        )[0]
+        PoreWaterForce = [np.zeros((np.shape(CellsInside)[0], 1))] * np.shape(TimeToAnalyse)[0]
 
     ## !!!
     ##This part is for validation problem 1, poblem 2, problem 3 slide 1 dry, problem 3 slide 2 dry
-    if (
-        ProblemName == "Pr1"
-        or ProblemName == "Pr2"
-        or ProblemName == "Pr3S1Dry"
-        or ProblemName == "Pr3S2Dry"
-    ):
+    if ProblemName == "Pr1" or ProblemName == "Pr2" or ProblemName == "Pr3S1Dry" or ProblemName == "Pr3S2Dry":
         for corr_n in range(np.shape(PoreWaterForce)[0]):
             ## Correction
             PoreWaterForce[corr_n] = np.zeros((np.shape(CellsInside)[0], 1))
@@ -4212,21 +3666,12 @@ def EllipsoidFSWithSubDis_v1_0_SingleProcess(
         FS3D_current = np.round(FS3D[TimeInd], 5)
 
         ## Global indexes
-        GlobalIndexFS = (
-            TimeInd * nrows_org * ncols_org * MCnumber
-            + nrows_org * ncols_org * MC_current
-            + (indexesOriginal // ncols_org) * ncols_org
-            + (indexesOriginal % ncols_org)
-        )
+        GlobalIndexFS = TimeInd * nrows_org * ncols_org * MCnumber + nrows_org * ncols_org * MC_current + (indexesOriginal // ncols_org) * ncols_org + (indexesOriginal % ncols_org)
         GlobalIndexFS = np.asarray(GlobalIndexFS, dtype=int)
 
         ## Assign the min FS to the cells inside the sliding surface
         for i in GlobalIndexFS:
-            FS_All_MC[i] = (
-                FS3D_current
-                if ((FS_All_MC[i] == 0) or (FS_All_MC[i] > FS3D_current))
-                else FS_All_MC[i]
-            )
+            FS_All_MC[i] = FS3D_current if ((FS_All_MC[i] == 0) or (FS_All_MC[i] > FS3D_current)) else FS_All_MC[i]
 
         ## If you want to check
         # B = np.asarray(FS_All_MC)
@@ -4239,30 +3684,7 @@ def EllipsoidFSWithSubDis_v1_0_SingleProcess(
 
 
 # ---------------------------------------------------------------------------------
-def EllipsoidFSWithSubDis_v1_0_MultiProcess(
-    queue,
-    FS_All_MC,
-    AnalysisType,
-    MCnumber,
-    FSCalType,
-    SubDisNum,
-    nrows,
-    ncols,
-    nel,
-    cellsize,
-    Parameter_Fields,
-    EllParam,
-    SlopeInput,
-    ZmaxInput,
-    DEMInput,
-    HwInput,
-    rizeroInput,
-    riInp,
-    AspectInput,
-    TimeToAnalyse,
-    NoData,
-    ProblemName="",
-):
+def EllipsoidFSWithSubDis_v1_0_MultiProcess(queue, FS_All_MC, AnalysisType, MCnumber, FSCalType, SubDisNum, nrows, ncols, nel, cellsize, Parameter_Fields, EllParam, SlopeInput, ZmaxInput, DEMInput, HwInput, rizeroInput, riInp, AspectInput, TimeToAnalyse, NoData, ProblemName=""):
     """
     This function calculates the factor of safety by assuming an ellipsoidal shape, and used in multiple processor function.
 
@@ -4409,14 +3831,8 @@ def EllipsoidFSWithSubDis_v1_0_MultiProcess(
 
         ## Ellipsoidal parameters
         ## Global coordinates based on EllRow, EllColumn
-        temp = CoorG[
-            np.ix_(
-                CoorG[:, 0] == np.array((EllRow)), np.array([False, True, True, True])
-            )
-        ]
-        temp = temp[
-            np.ix_(temp[:, 0] == np.array((EllColumn)), np.array([False, True, True]))
-        ]
+        temp = CoorG[np.ix_(CoorG[:, 0] == np.array((EllRow)), np.array([False, True, True, True]))]
+        temp = temp[np.ix_(temp[:, 0] == np.array((EllColumn)), np.array([False, True, True]))]
         ## Coordinates accotding to the global
         EllCenterX = temp[0][0]
         EllCenterY = temp[0][1]
@@ -4451,12 +3867,8 @@ def EllipsoidFSWithSubDis_v1_0_MultiProcess(
         elif EllAlpha_Calc == "No":
             EllAlpha = EllParam[3]
 
-        x1 = CoorEll[:, 2] * np.cos(np.radians(EllAlpha)) - CoorEll[:, 3] * np.sin(
-            np.radians(EllAlpha)
-        )
-        y1 = CoorEll[:, 3] * np.cos(np.radians(EllAlpha)) + CoorEll[:, 2] * np.sin(
-            np.radians(EllAlpha)
-        )
+        x1 = CoorEll[:, 2] * np.cos(np.radians(EllAlpha)) - CoorEll[:, 3] * np.sin(np.radians(EllAlpha))
+        y1 = CoorEll[:, 3] * np.cos(np.radians(EllAlpha)) + CoorEll[:, 2] * np.sin(np.radians(EllAlpha))
         ## Coordinates according to the ellipsoid coordinate system, e'(e rotated by EllAlpha)
         CoorEll1 = np.concatenate(
             (
@@ -4467,25 +3879,15 @@ def EllipsoidFSWithSubDis_v1_0_MultiProcess(
             axis=1,
         )
         ## Cells inside the zone of rectangle with the dimensions of (2*Ella – 2* Ellb)
-        CellsInsideRect = CoorEll1[
-            (np.abs(CoorEll1[:, 2]) <= Ella) & (np.abs(CoorEll1[:, 3]) <= Ellb)
-        ]
+        CellsInsideRect = CoorEll1[(np.abs(CoorEll1[:, 2]) <= Ella) & (np.abs(CoorEll1[:, 3]) <= Ellb)]
         ## Slope of the ellipsoid is the average slope around the ellipsoid (a rectangular area)
-        SlopeRect = SlopeInput[
-            CellsInsideRect[:, 0].astype(int), CellsInsideRect[:, 1].astype(int)
-        ]
-        SlopeRect = SlopeRect[
-            SlopeRect != NoData
-        ]  # Remove the value of no data, NoData
+        SlopeRect = SlopeInput[CellsInsideRect[:, 0].astype(int), CellsInsideRect[:, 1].astype(int)]
+        SlopeRect = SlopeRect[SlopeRect != NoData]  # Remove the value of no data, NoData
         EllBeta = np.mean(SlopeRect)
 
         ##!!!
         ##This part is for validation problem 3
-        if (
-            ProblemName == "Pr3S1Dry"
-            or ProblemName == "Pr3S2Dry"
-            or ProblemName == "Pr3S2Wet"
-        ):
+        if ProblemName == "Pr3S1Dry" or ProblemName == "Pr3S2Dry" or ProblemName == "Pr3S2Wet":
             EllBeta = np.degrees(np.arctan(0.5))
         ##!!!
 
@@ -4522,9 +3924,7 @@ def EllipsoidFSWithSubDis_v1_0_MultiProcess(
             Ellc,
             Ellz,
         )
-        CellsInside[np.abs(CellsInside) < 1e-10] = (
-            0  ## Correction to the very low values
-        )
+        CellsInside[np.abs(CellsInside) < 1e-10] = 0  ## Correction to the very low values
 
         ## Calculate the depth at a given cell
         ## If the DEM of the cell is lower than the DEM of the sliding surface, it is removed.
@@ -4543,11 +3943,7 @@ def EllipsoidFSWithSubDis_v1_0_MultiProcess(
         Depths = np.reshape(Depths, (np.shape(CellsInside)[0], 1))
         Depths[np.isnan(Depths)] = 0
         ## DEM of the sliding surface
-        DepthDEM = EllDEMCenter - (
-            np.reshape(CellsInside[:, 2], (np.shape(CellsInside)[0], 1))
-            * np.tan(np.radians(EllBeta))
-            + Depths
-        )
+        DepthDEM = EllDEMCenter - (np.reshape(CellsInside[:, 2], (np.shape(CellsInside)[0], 1)) * np.tan(np.radians(EllBeta)) + Depths)
 
         ##!!!
         ##This part is for validation problem 2
@@ -4556,10 +3952,7 @@ def EllipsoidFSWithSubDis_v1_0_MultiProcess(
             SlopeInput2[: int(0.58 / cellsize) + 1] = SlopeInput[1, 1]
             DEMInput2 = np.zeros((nrows))
             for i in range(nrows - 1):
-                DEMInput2[i + 1] = DEMInput2[i] + +(
-                    cellsize / 2 * np.tan(np.radians(SlopeInput2[i]))
-                    + cellsize / 2 * np.tan(np.radians(SlopeInput2[i + 1]))
-                )
+                DEMInput2[i + 1] = DEMInput2[i] + +(cellsize / 2 * np.tan(np.radians(SlopeInput2[i])) + cellsize / 2 * np.tan(np.radians(SlopeInput2[i + 1])))
             DEMInput2 = DEMInput2 + cellsize / 2 * np.tan(np.radians(SlopeInput[1, 1]))
             DEMInput2 = DEMInput2[::-1]
             DEMInput2 = np.transpose([DEMInput2] * ncols)
@@ -4569,9 +3962,7 @@ def EllipsoidFSWithSubDis_v1_0_MultiProcess(
 
         DEMdiff = (
             np.reshape(
-                DEMInput[
-                    (CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))
-                ],
+                DEMInput[(CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))],
                 (np.shape(CellsInside)[0], 1),
             )
             - DepthDEM
@@ -4628,9 +4019,7 @@ def EllipsoidFSWithSubDis_v1_0_MultiProcess(
                             (nrows - 1) * cellsize + cellsize / 2 - i * cellsize,
                         ]
                     )
-            CoorG_new = np.asarray(
-                CoorG_new
-            )  # (row #, column #, x coordinate, y coordinate)
+            CoorG_new = np.asarray(CoorG_new)  # (row #, column #, x coordinate, y coordinate)
 
             ## Follow the index numbers
             IndexTemp = np.kron(IndexTemp, np.ones((2, 2)))
@@ -4655,9 +4044,7 @@ def EllipsoidFSWithSubDis_v1_0_MultiProcess(
             ZmaxInput = np.kron(ZmaxInput, np.ones((2, 2)))  ## Zmax input
             DEMInput = np.kron(DEMInput, np.ones((2, 2)))  ## DEM input
             HwInput = np.kron(HwInput, np.ones((2, 2)))  ## Ground water table input
-            rizeroInput = np.kron(
-                rizeroInput, np.ones((2, 2))
-            )  ## Background infiltration rate input
+            rizeroInput = np.kron(rizeroInput, np.ones((2, 2)))  ## Background infiltration rate input
 
             # ## Linear interpolation
             # ## Slope input
@@ -4700,9 +4087,7 @@ def EllipsoidFSWithSubDis_v1_0_MultiProcess(
                 #             + cellsize / 2 * np.tan(np.radians(SlopeInput[j, i]))
                 #         )
                 # DEMInput = DEMInput + 50  # I added but no need.
-                DEMInput = Calculate_DEM_SimpCase(
-                    DEMInput, SlopeInput, nrows_org, nrows, ncols, cellsize
-                )
+                DEMInput = Calculate_DEM_SimpCase(DEMInput, SlopeInput, nrows_org, nrows, ncols, cellsize)
             ### !!!
 
             ## Determine the cell inside the ellipsoid
@@ -4725,9 +4110,7 @@ def EllipsoidFSWithSubDis_v1_0_MultiProcess(
                 Ellc,
                 Ellz,
             )
-            CellsInside[np.abs(CellsInside) < 1e-10] = (
-                0  ## correction to the very low values
-            )
+            CellsInside[np.abs(CellsInside) < 1e-10] = 0  ## correction to the very low values
 
             ## Calculate the depth at a given cell
             ## If the DEM of the cell is lower than the DEM of the sliding surface, it is removed.
@@ -4746,17 +4129,11 @@ def EllipsoidFSWithSubDis_v1_0_MultiProcess(
             Depths = np.reshape(Depths, (np.shape(CellsInside)[0], 1))
             Depths[np.isnan(Depths)] = 0
             ## DEM of the sliding surface
-            DepthDEM = EllDEMCenter - (
-                np.reshape(CellsInside[:, 2], (np.shape(CellsInside)[0], 1))
-                * np.tan(np.radians(EllBeta))
-                + Depths
-            )
+            DepthDEM = EllDEMCenter - (np.reshape(CellsInside[:, 2], (np.shape(CellsInside)[0], 1)) * np.tan(np.radians(EllBeta)) + Depths)
             # DEMdiff = (DEMInput[(int(CellsInside[i,0]),int(CellsInside[i,1]))] - DepthDEM[i,0])
             DEMdiff = (
                 np.reshape(
-                    DEMInput[
-                        (CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))
-                    ],
+                    DEMInput[(CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))],
                     (np.shape(CellsInside)[0], 1),
                 )
                 - DepthDEM
@@ -4781,9 +4158,7 @@ def EllipsoidFSWithSubDis_v1_0_MultiProcess(
             DEMdiff2 = DEMInput[Cell_row, Cell_column] - DepthDEM[i, 0]
             ## If the DEM of the sliding surface is higher than the cell's DEM. Thickness becomes zero.
             Thickness[i] = DEMdiff2 if DEMdiff2 > 0 else 0  ## Thickness
-            Weight[i] = (
-                Thickness[i] * cellsize**2 * Gamma[Cell_row, Cell_column]
-            )  ## Weight
+            Weight[i] = Thickness[i] * cellsize**2 * Gamma[Cell_row, Cell_column]  ## Weight
 
         # See = np.zeros((nrows,ncols))
         # for i in range(np.shape(CellsInside)[0]):
@@ -4802,8 +4177,7 @@ def EllipsoidFSWithSubDis_v1_0_MultiProcess(
 
         ## Coordinate according to the e'' coordinate system (center of ellipsoid)
         xvalues = np.reshape(
-            CellsInside[:, 2] / np.cos(np.radians(EllBeta))
-            + Depths[:, 0] * np.sin(np.radians(EllBeta)),
+            CellsInside[:, 2] / np.cos(np.radians(EllBeta)) + Depths[:, 0] * np.sin(np.radians(EllBeta)),
             (np.shape(CellsInside)[0], 1),
         )
         yvalues = np.reshape(CellsInside[:, 3], (np.shape(CellsInside)[0], 1))
@@ -4815,9 +4189,7 @@ def EllipsoidFSWithSubDis_v1_0_MultiProcess(
         # zvalues2 = np.reshape( Depths[:,0]  * np.cos(np.radians(EllBeta)) + Ellz  , (np.shape(CellsInside)[0],1) )
 
         ## Cells inside according to e'' coordinate system
-        CellsInsideE11 = np.concatenate(
-            (CellsInside[:, 0:2], xvalues, yvalues, zvalues), axis=1
-        )
+        CellsInsideE11 = np.concatenate((CellsInside[:, 0:2], xvalues, yvalues, zvalues), axis=1)
 
         ## Gradient According to e''
         GradientsE11 = []  ## Allocate
@@ -4892,13 +4264,9 @@ def EllipsoidFSWithSubDis_v1_0_MultiProcess(
         """
         # Transform the vector to the e' coordinate system
         GradientsE1 = np.zeros(((np.shape(CellsInside)[0], 3)))
-        GradientsE1[:, 0] = GradientsE11[:, 0] * np.cos(
-            np.radians(EllBeta)
-        ) + GradientsE11[:, 2] * np.sin(np.radians(EllBeta))
+        GradientsE1[:, 0] = GradientsE11[:, 0] * np.cos(np.radians(EllBeta)) + GradientsE11[:, 2] * np.sin(np.radians(EllBeta))
         GradientsE1[:, 1] = GradientsE11[:, 1]
-        GradientsE1[:, 2] = -GradientsE11[:, 0] * np.sin(
-            np.radians(EllBeta)
-        ) + GradientsE11[:, 2] * np.cos(np.radians(EllBeta))
+        GradientsE1[:, 2] = -GradientsE11[:, 0] * np.sin(np.radians(EllBeta)) + GradientsE11[:, 2] * np.cos(np.radians(EllBeta))
 
         # ## Angle between normal vector and x' axis on XZ' plane
         # n = np.array((GradientsE1[:,0],GradientsE1[:,2])).T
@@ -4928,9 +4296,7 @@ def EllipsoidFSWithSubDis_v1_0_MultiProcess(
 
         ## Calculation of Theta (Dip angle)
         ## Angle between 3D normal vector and Z' axis.
-        n = np.array(
-            (GradientsE1Minus[:, 0], GradientsE1Minus[:, 1], GradientsE1Minus[:, 2])
-        ).T
+        n = np.array((GradientsE1Minus[:, 0], GradientsE1Minus[:, 1], GradientsE1Minus[:, 2])).T
         vx11 = np.array([0.0, 0.0, 1.0])
         uvx11 = vx11 / np.linalg.norm(vx11)
         AngleNormal3DWE1 = []  ## Allocate. It will be assigned to Theta below.
@@ -4953,13 +4319,9 @@ def EllipsoidFSWithSubDis_v1_0_MultiProcess(
 
         ## This formulation also gives the tangents !!
         ## This can be checked to see that the above formulation and the previous calculations are resulting in the same values.
-        Tanxz = np.degrees(
-            np.arctan(np.tan(np.radians(Theta)) * np.cos(np.radians(Asp)))
-        )
+        Tanxz = np.degrees(np.arctan(np.tan(np.radians(Theta)) * np.cos(np.radians(Asp))))
         # Tanxz = AngleTangentXZE1
-        Tanyz = np.degrees(
-            np.arctan(np.tan(np.radians(Theta)) * np.sin(np.radians(Asp)))
-        )
+        Tanyz = np.degrees(np.arctan(np.tan(np.radians(Theta)) * np.sin(np.radians(Asp))))
         ## Limit the slopes and areas (by trial and error).
         Tanxz[Tanxz > 85.0] = 85.0
         Tanyz[Tanyz > 85.0] = 85.0
@@ -4978,22 +4340,7 @@ def EllipsoidFSWithSubDis_v1_0_MultiProcess(
         ## Calculation of the area by using the formulation given in Xie's or Hungr's papers.
         A = []  ## Allocate
         for i in range(np.shape(CellsInside)[0]):
-            A.append(
-                (cellsize**2)
-                * (
-                    (
-                        np.sqrt(
-                            1
-                            - ((np.sin(np.radians(Tanyz[i]))) ** 2)
-                            * ((np.sin(np.radians((Tanxz[i])))) ** 2)
-                        )
-                    )
-                )
-                / (
-                    ((np.cos(np.radians((Tanyz[i])))))
-                    * ((np.cos(np.radians((Tanxz[i])))))
-                )
-            )
+            A.append((cellsize**2) * ((np.sqrt(1 - ((np.sin(np.radians(Tanyz[i]))) ** 2) * ((np.sin(np.radians((Tanxz[i])))) ** 2)))) / (((np.cos(np.radians((Tanyz[i]))))) * ((np.cos(np.radians((Tanxz[i])))))))
         A = np.asarray(A)
         A = np.reshape(A, (np.shape(CellsInside)[0], 1))
 
@@ -5067,18 +4414,14 @@ def EllipsoidFSWithSubDis_v1_0_MultiProcess(
         ## Weight is recalculated.
         for i in condzmax:
             # print(i)
-            Weight[i] = (
-                ZmaxInput[indexes][i] * cellsize**2 * Gamma.flatten()[indexes][i]
-            )  ## Weight
+            Weight[i] = ZmaxInput[indexes][i] * cellsize**2 * Gamma.flatten()[indexes][i]  ## Weight
 
         # Reshape and truncate to the slope of the current cell
         ThetaAvr = np.reshape(ThetaAvr, (np.shape(CellsInside)[0], 1))
         Theta = np.reshape(Theta, (np.shape(CellsInside)[0], 1))
         AngleTangentXZE1 = np.reshape(AngleTangentXZE1, (np.shape(CellsInside)[0], 1))
 
-        TempSlope = SlopeInput[
-            (CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))
-        ].T[condzmax]
+        TempSlope = SlopeInput[(CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))].T[condzmax]
         ThetaAvr[condzmax] = np.reshape(TempSlope, (np.shape(TempSlope)[0], 1))
         Theta[condzmax] = np.reshape(TempSlope, (np.shape(TempSlope)[0], 1))
         AngleTangentXZE1[condzmax] = np.reshape(TempSlope, (np.shape(TempSlope)[0], 1))
@@ -5146,18 +4489,11 @@ def EllipsoidFSWithSubDis_v1_0_MultiProcess(
             )
         elif AnalysisType == "Undrained":
             # PoreWaterForce = np.zeros((np.shape(CellsInside)[0],1))
-            PoreWaterForce = [np.zeros((np.shape(CellsInside)[0], 1))] * np.shape(
-                TimeToAnalyse
-            )[0]
+            PoreWaterForce = [np.zeros((np.shape(CellsInside)[0], 1))] * np.shape(TimeToAnalyse)[0]
 
         ## !!!
         ##This part is for validation problem 1, poblem 2, problem 3 slide 1 dry, problem 3 slide 2 dry
-        if (
-            ProblemName == "Pr1"
-            or ProblemName == "Pr2"
-            or ProblemName == "Pr3S1Dry"
-            or ProblemName == "Pr3S2Dry"
-        ):
+        if ProblemName == "Pr1" or ProblemName == "Pr2" or ProblemName == "Pr3S1Dry" or ProblemName == "Pr3S2Dry":
             for corr_n in range(np.shape(PoreWaterForce)[0]):
                 ## Correction
                 PoreWaterForce[corr_n] = np.zeros((np.shape(CellsInside)[0], 1))
@@ -5339,21 +4675,12 @@ def EllipsoidFSWithSubDis_v1_0_MultiProcess(
             FS3D_current = np.round(FS3D[TimeInd], 5)
 
             ## Global indexes
-            GlobalIndexFS = (
-                TimeInd * nrows_org * ncols_org * MCnumber
-                + nrows_org * ncols_org * MC_current
-                + (indexesOriginal // ncols_org) * ncols_org
-                + (indexesOriginal % ncols_org)
-            )
+            GlobalIndexFS = TimeInd * nrows_org * ncols_org * MCnumber + nrows_org * ncols_org * MC_current + (indexesOriginal // ncols_org) * ncols_org + (indexesOriginal % ncols_org)
             GlobalIndexFS = np.asarray(GlobalIndexFS, dtype=int)
 
             ## Assign the min FS to the cells inside the sliding surface
             for i in GlobalIndexFS:
-                FS_All_MC[i] = (
-                    FS3D_current
-                    if ((FS_All_MC[i] == 0) or (FS_All_MC[i] > FS3D_current))
-                    else FS_All_MC[i]
-                )
+                FS_All_MC[i] = FS3D_current if ((FS_All_MC[i] == 0) or (FS_All_MC[i] > FS3D_current)) else FS_All_MC[i]
 
         print(
             "************************************************************ MC:",
@@ -5369,30 +4696,7 @@ def EllipsoidFSWithSubDis_v1_0_MultiProcess(
 
 
 # ---------------------------------------------------------------------------------
-def EllipsoidFSWithSubDis_v1_0_MultiThread(
-    queue,
-    FS_All_MC,
-    AnalysisType,
-    MCnumber,
-    FSCalType,
-    SubDisNum,
-    nrows,
-    ncols,
-    nel,
-    cellsize,
-    Parameter_Fields,
-    EllParam,
-    SlopeInput,
-    ZmaxInput,
-    DEMInput,
-    HwInput,
-    rizeroInput,
-    riInp,
-    AspectInput,
-    TimeToAnalyse,
-    NoData,
-    ProblemName="",
-):
+def EllipsoidFSWithSubDis_v1_0_MultiThread(queue, FS_All_MC, AnalysisType, MCnumber, FSCalType, SubDisNum, nrows, ncols, nel, cellsize, Parameter_Fields, EllParam, SlopeInput, ZmaxInput, DEMInput, HwInput, rizeroInput, riInp, AspectInput, TimeToAnalyse, NoData, ProblemName=""):
     """
     This function calculates the factor of safety by assuming an ellipsoidal shape, and used in multiple thread function.
 
@@ -5539,14 +4843,8 @@ def EllipsoidFSWithSubDis_v1_0_MultiThread(
 
         ## Ellipsoidal parameters
         ## Global coordinates based on EllRow, EllColumn
-        temp = CoorG[
-            np.ix_(
-                CoorG[:, 0] == np.array((EllRow)), np.array([False, True, True, True])
-            )
-        ]
-        temp = temp[
-            np.ix_(temp[:, 0] == np.array((EllColumn)), np.array([False, True, True]))
-        ]
+        temp = CoorG[np.ix_(CoorG[:, 0] == np.array((EllRow)), np.array([False, True, True, True]))]
+        temp = temp[np.ix_(temp[:, 0] == np.array((EllColumn)), np.array([False, True, True]))]
         ## Coordinates accotding to the global
         EllCenterX = temp[0][0]
         EllCenterY = temp[0][1]
@@ -5581,12 +4879,8 @@ def EllipsoidFSWithSubDis_v1_0_MultiThread(
         elif EllAlpha_Calc == "No":
             EllAlpha = EllParam[3]
 
-        x1 = CoorEll[:, 2] * np.cos(np.radians(EllAlpha)) - CoorEll[:, 3] * np.sin(
-            np.radians(EllAlpha)
-        )
-        y1 = CoorEll[:, 3] * np.cos(np.radians(EllAlpha)) + CoorEll[:, 2] * np.sin(
-            np.radians(EllAlpha)
-        )
+        x1 = CoorEll[:, 2] * np.cos(np.radians(EllAlpha)) - CoorEll[:, 3] * np.sin(np.radians(EllAlpha))
+        y1 = CoorEll[:, 3] * np.cos(np.radians(EllAlpha)) + CoorEll[:, 2] * np.sin(np.radians(EllAlpha))
         ## Coordinates according to the ellipsoid coordinate system, e'(e rotated by EllAlpha)
         CoorEll1 = np.concatenate(
             (
@@ -5597,25 +4891,15 @@ def EllipsoidFSWithSubDis_v1_0_MultiThread(
             axis=1,
         )
         ## Cells inside the zone of rectangle with the dimensions of (2*Ella – 2* Ellb)
-        CellsInsideRect = CoorEll1[
-            (np.abs(CoorEll1[:, 2]) <= Ella) & (np.abs(CoorEll1[:, 3]) <= Ellb)
-        ]
+        CellsInsideRect = CoorEll1[(np.abs(CoorEll1[:, 2]) <= Ella) & (np.abs(CoorEll1[:, 3]) <= Ellb)]
         ## Slope of the ellipsoid is the average slope around the ellipsoid (a rectangular area)
-        SlopeRect = SlopeInput[
-            CellsInsideRect[:, 0].astype(int), CellsInsideRect[:, 1].astype(int)
-        ]
-        SlopeRect = SlopeRect[
-            SlopeRect != NoData
-        ]  # Remove the value of no data, NoData
+        SlopeRect = SlopeInput[CellsInsideRect[:, 0].astype(int), CellsInsideRect[:, 1].astype(int)]
+        SlopeRect = SlopeRect[SlopeRect != NoData]  # Remove the value of no data, NoData
         EllBeta = np.mean(SlopeRect)
 
         ##!!!
         ##This part is for validation problem 3
-        if (
-            ProblemName == "Pr3S1Dry"
-            or ProblemName == "Pr3S2Dry"
-            or ProblemName == "Pr3S2Wet"
-        ):
+        if ProblemName == "Pr3S1Dry" or ProblemName == "Pr3S2Dry" or ProblemName == "Pr3S2Wet":
             EllBeta = np.degrees(np.arctan(0.5))
         ##!!!
 
@@ -5652,9 +4936,7 @@ def EllipsoidFSWithSubDis_v1_0_MultiThread(
             Ellc,
             Ellz,
         )
-        CellsInside[np.abs(CellsInside) < 1e-10] = (
-            0  ## Correction to the very low values
-        )
+        CellsInside[np.abs(CellsInside) < 1e-10] = 0  ## Correction to the very low values
 
         ## Calculate the depth at a given cell
         ## If the DEM of the cell is lower than the DEM of the sliding surface, it is removed.
@@ -5673,11 +4955,7 @@ def EllipsoidFSWithSubDis_v1_0_MultiThread(
         Depths = np.reshape(Depths, (np.shape(CellsInside)[0], 1))
         Depths[np.isnan(Depths)] = 0
         ## DEM of the sliding surface
-        DepthDEM = EllDEMCenter - (
-            np.reshape(CellsInside[:, 2], (np.shape(CellsInside)[0], 1))
-            * np.tan(np.radians(EllBeta))
-            + Depths
-        )
+        DepthDEM = EllDEMCenter - (np.reshape(CellsInside[:, 2], (np.shape(CellsInside)[0], 1)) * np.tan(np.radians(EllBeta)) + Depths)
 
         ##!!!
         ##This part is for validation problem 2
@@ -5686,10 +4964,7 @@ def EllipsoidFSWithSubDis_v1_0_MultiThread(
             SlopeInput2[: int(0.58 / cellsize) + 1] = SlopeInput[1, 1]
             DEMInput2 = np.zeros((nrows))
             for i in range(nrows - 1):
-                DEMInput2[i + 1] = DEMInput2[i] + +(
-                    cellsize / 2 * np.tan(np.radians(SlopeInput2[i]))
-                    + cellsize / 2 * np.tan(np.radians(SlopeInput2[i + 1]))
-                )
+                DEMInput2[i + 1] = DEMInput2[i] + +(cellsize / 2 * np.tan(np.radians(SlopeInput2[i])) + cellsize / 2 * np.tan(np.radians(SlopeInput2[i + 1])))
             DEMInput2 = DEMInput2 + cellsize / 2 * np.tan(np.radians(SlopeInput[1, 1]))
             DEMInput2 = DEMInput2[::-1]
             DEMInput2 = np.transpose([DEMInput2] * ncols)
@@ -5699,9 +4974,7 @@ def EllipsoidFSWithSubDis_v1_0_MultiThread(
 
         DEMdiff = (
             np.reshape(
-                DEMInput[
-                    (CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))
-                ],
+                DEMInput[(CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))],
                 (np.shape(CellsInside)[0], 1),
             )
             - DepthDEM
@@ -5758,9 +5031,7 @@ def EllipsoidFSWithSubDis_v1_0_MultiThread(
                             (nrows - 1) * cellsize + cellsize / 2 - i * cellsize,
                         ]
                     )
-            CoorG_new = np.asarray(
-                CoorG_new
-            )  # (row #, column #, x coordinate, y coordinate)
+            CoorG_new = np.asarray(CoorG_new)  # (row #, column #, x coordinate, y coordinate)
 
             ## Follow the index numbers
             IndexTemp = np.kron(IndexTemp, np.ones((2, 2)))
@@ -5785,9 +5056,7 @@ def EllipsoidFSWithSubDis_v1_0_MultiThread(
             ZmaxInput = np.kron(ZmaxInput, np.ones((2, 2)))  ## Zmax input
             DEMInput = np.kron(DEMInput, np.ones((2, 2)))  ## DEM input
             HwInput = np.kron(HwInput, np.ones((2, 2)))  ## Ground water table input
-            rizeroInput = np.kron(
-                rizeroInput, np.ones((2, 2))
-            )  ## Background infiltration rate input
+            rizeroInput = np.kron(rizeroInput, np.ones((2, 2)))  ## Background infiltration rate input
 
             # ## Linear interpolation
             # ## Slope input
@@ -5830,9 +5099,7 @@ def EllipsoidFSWithSubDis_v1_0_MultiThread(
                 #             + cellsize / 2 * np.tan(np.radians(SlopeInput[j, i]))
                 #         )
                 # DEMInput = DEMInput + 50  # I added but no need.
-                DEMInput = Calculate_DEM_SimpCase(
-                    DEMInput, SlopeInput, nrows_org, nrows, ncols, cellsize
-                )
+                DEMInput = Calculate_DEM_SimpCase(DEMInput, SlopeInput, nrows_org, nrows, ncols, cellsize)
             ### !!!
 
             ## Determine the cell inside the ellipsoid
@@ -5855,9 +5122,7 @@ def EllipsoidFSWithSubDis_v1_0_MultiThread(
                 Ellc,
                 Ellz,
             )
-            CellsInside[np.abs(CellsInside) < 1e-10] = (
-                0  ## correction to the very low values
-            )
+            CellsInside[np.abs(CellsInside) < 1e-10] = 0  ## correction to the very low values
 
             ## Calculate the depth at a given cell
             ## If the DEM of the cell is lower than the DEM of the sliding surface, it is removed.
@@ -5876,17 +5141,11 @@ def EllipsoidFSWithSubDis_v1_0_MultiThread(
             Depths = np.reshape(Depths, (np.shape(CellsInside)[0], 1))
             Depths[np.isnan(Depths)] = 0
             ## DEM of the sliding surface
-            DepthDEM = EllDEMCenter - (
-                np.reshape(CellsInside[:, 2], (np.shape(CellsInside)[0], 1))
-                * np.tan(np.radians(EllBeta))
-                + Depths
-            )
+            DepthDEM = EllDEMCenter - (np.reshape(CellsInside[:, 2], (np.shape(CellsInside)[0], 1)) * np.tan(np.radians(EllBeta)) + Depths)
             # DEMdiff = (DEMInput[(int(CellsInside[i,0]),int(CellsInside[i,1]))] - DepthDEM[i,0])
             DEMdiff = (
                 np.reshape(
-                    DEMInput[
-                        (CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))
-                    ],
+                    DEMInput[(CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))],
                     (np.shape(CellsInside)[0], 1),
                 )
                 - DepthDEM
@@ -5911,9 +5170,7 @@ def EllipsoidFSWithSubDis_v1_0_MultiThread(
             DEMdiff2 = DEMInput[Cell_row, Cell_column] - DepthDEM[i, 0]
             ## If the DEM of the sliding surface is higher than the cell's DEM. Thickness becomes zero.
             Thickness[i] = DEMdiff2 if DEMdiff2 > 0 else 0  ## Thickness
-            Weight[i] = (
-                Thickness[i] * cellsize**2 * Gamma[Cell_row, Cell_column]
-            )  ## Weight
+            Weight[i] = Thickness[i] * cellsize**2 * Gamma[Cell_row, Cell_column]  ## Weight
 
         # See = np.zeros((nrows,ncols))
         # for i in range(np.shape(CellsInside)[0]):
@@ -5932,8 +5189,7 @@ def EllipsoidFSWithSubDis_v1_0_MultiThread(
 
         ## Coordinate according to the e'' coordinate system (center of ellipsoid)
         xvalues = np.reshape(
-            CellsInside[:, 2] / np.cos(np.radians(EllBeta))
-            + Depths[:, 0] * np.sin(np.radians(EllBeta)),
+            CellsInside[:, 2] / np.cos(np.radians(EllBeta)) + Depths[:, 0] * np.sin(np.radians(EllBeta)),
             (np.shape(CellsInside)[0], 1),
         )
         yvalues = np.reshape(CellsInside[:, 3], (np.shape(CellsInside)[0], 1))
@@ -5945,9 +5201,7 @@ def EllipsoidFSWithSubDis_v1_0_MultiThread(
         # zvalues2 = np.reshape( Depths[:,0]  * np.cos(np.radians(EllBeta)) + Ellz  , (np.shape(CellsInside)[0],1) )
 
         ## Cells inside according to e'' coordinate system
-        CellsInsideE11 = np.concatenate(
-            (CellsInside[:, 0:2], xvalues, yvalues, zvalues), axis=1
-        )
+        CellsInsideE11 = np.concatenate((CellsInside[:, 0:2], xvalues, yvalues, zvalues), axis=1)
 
         ## Gradient According to e''
         GradientsE11 = []  ## Allocate
@@ -6022,13 +5276,9 @@ def EllipsoidFSWithSubDis_v1_0_MultiThread(
         """
         # Transform the vector to the e' coordinate system
         GradientsE1 = np.zeros(((np.shape(CellsInside)[0], 3)))
-        GradientsE1[:, 0] = GradientsE11[:, 0] * np.cos(
-            np.radians(EllBeta)
-        ) + GradientsE11[:, 2] * np.sin(np.radians(EllBeta))
+        GradientsE1[:, 0] = GradientsE11[:, 0] * np.cos(np.radians(EllBeta)) + GradientsE11[:, 2] * np.sin(np.radians(EllBeta))
         GradientsE1[:, 1] = GradientsE11[:, 1]
-        GradientsE1[:, 2] = -GradientsE11[:, 0] * np.sin(
-            np.radians(EllBeta)
-        ) + GradientsE11[:, 2] * np.cos(np.radians(EllBeta))
+        GradientsE1[:, 2] = -GradientsE11[:, 0] * np.sin(np.radians(EllBeta)) + GradientsE11[:, 2] * np.cos(np.radians(EllBeta))
 
         # ## Angle between normal vector and x' axis on XZ' plane
         # n = np.array((GradientsE1[:,0],GradientsE1[:,2])).T
@@ -6058,9 +5308,7 @@ def EllipsoidFSWithSubDis_v1_0_MultiThread(
 
         ## Calculation of Theta (Dip angle)
         ## Angle between 3D normal vector and Z' axis.
-        n = np.array(
-            (GradientsE1Minus[:, 0], GradientsE1Minus[:, 1], GradientsE1Minus[:, 2])
-        ).T
+        n = np.array((GradientsE1Minus[:, 0], GradientsE1Minus[:, 1], GradientsE1Minus[:, 2])).T
         vx11 = np.array([0.0, 0.0, 1.0])
         uvx11 = vx11 / np.linalg.norm(vx11)
         AngleNormal3DWE1 = []  ## Allocate. It will be assigned to Theta below.
@@ -6083,13 +5331,9 @@ def EllipsoidFSWithSubDis_v1_0_MultiThread(
 
         ## This formulation also gives the tangents !!
         ## This can be checked to see that the above formulation and the previous calculations are resulting in the same values.
-        Tanxz = np.degrees(
-            np.arctan(np.tan(np.radians(Theta)) * np.cos(np.radians(Asp)))
-        )
+        Tanxz = np.degrees(np.arctan(np.tan(np.radians(Theta)) * np.cos(np.radians(Asp))))
         # Tanxz = AngleTangentXZE1
-        Tanyz = np.degrees(
-            np.arctan(np.tan(np.radians(Theta)) * np.sin(np.radians(Asp)))
-        )
+        Tanyz = np.degrees(np.arctan(np.tan(np.radians(Theta)) * np.sin(np.radians(Asp))))
         ## Limit the slopes and areas (by trial and error).
         Tanxz[Tanxz > 85.0] = 85.0
         Tanyz[Tanyz > 85.0] = 85.0
@@ -6108,22 +5352,7 @@ def EllipsoidFSWithSubDis_v1_0_MultiThread(
         ## Calculation of the area by using the formulation given in Xie's or Hungr's papers.
         A = []  ## Allocate
         for i in range(np.shape(CellsInside)[0]):
-            A.append(
-                (cellsize**2)
-                * (
-                    (
-                        np.sqrt(
-                            1
-                            - ((np.sin(np.radians(Tanyz[i]))) ** 2)
-                            * ((np.sin(np.radians((Tanxz[i])))) ** 2)
-                        )
-                    )
-                )
-                / (
-                    ((np.cos(np.radians((Tanyz[i])))))
-                    * ((np.cos(np.radians((Tanxz[i])))))
-                )
-            )
+            A.append((cellsize**2) * ((np.sqrt(1 - ((np.sin(np.radians(Tanyz[i]))) ** 2) * ((np.sin(np.radians((Tanxz[i])))) ** 2)))) / (((np.cos(np.radians((Tanyz[i]))))) * ((np.cos(np.radians((Tanxz[i])))))))
         A = np.asarray(A)
         A = np.reshape(A, (np.shape(CellsInside)[0], 1))
 
@@ -6197,18 +5426,14 @@ def EllipsoidFSWithSubDis_v1_0_MultiThread(
         ## Weight is recalculated.
         for i in condzmax:
             # print(i)
-            Weight[i] = (
-                ZmaxInput[indexes][i] * cellsize**2 * Gamma.flatten()[indexes][i]
-            )  ## Weight
+            Weight[i] = ZmaxInput[indexes][i] * cellsize**2 * Gamma.flatten()[indexes][i]  ## Weight
 
         # Reshape and truncate to the slope of the current cell
         ThetaAvr = np.reshape(ThetaAvr, (np.shape(CellsInside)[0], 1))
         Theta = np.reshape(Theta, (np.shape(CellsInside)[0], 1))
         AngleTangentXZE1 = np.reshape(AngleTangentXZE1, (np.shape(CellsInside)[0], 1))
 
-        TempSlope = SlopeInput[
-            (CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))
-        ].T[condzmax]
+        TempSlope = SlopeInput[(CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))].T[condzmax]
         ThetaAvr[condzmax] = np.reshape(TempSlope, (np.shape(TempSlope)[0], 1))
         Theta[condzmax] = np.reshape(TempSlope, (np.shape(TempSlope)[0], 1))
         AngleTangentXZE1[condzmax] = np.reshape(TempSlope, (np.shape(TempSlope)[0], 1))
@@ -6276,18 +5501,11 @@ def EllipsoidFSWithSubDis_v1_0_MultiThread(
             )
         elif AnalysisType == "Undrained":
             # PoreWaterForce = np.zeros((np.shape(CellsInside)[0],1))
-            PoreWaterForce = [np.zeros((np.shape(CellsInside)[0], 1))] * np.shape(
-                TimeToAnalyse
-            )[0]
+            PoreWaterForce = [np.zeros((np.shape(CellsInside)[0], 1))] * np.shape(TimeToAnalyse)[0]
 
         ## !!!
         ##This part is for validation problem 1, poblem 2, problem 3 slide 1 dry, problem 3 slide 2 dry
-        if (
-            ProblemName == "Pr1"
-            or ProblemName == "Pr2"
-            or ProblemName == "Pr3S1Dry"
-            or ProblemName == "Pr3S2Dry"
-        ):
+        if ProblemName == "Pr1" or ProblemName == "Pr2" or ProblemName == "Pr3S1Dry" or ProblemName == "Pr3S2Dry":
             for corr_n in range(np.shape(PoreWaterForce)[0]):
                 ## Correction
                 PoreWaterForce[corr_n] = np.zeros((np.shape(CellsInside)[0], 1))
@@ -6467,23 +5685,14 @@ def EllipsoidFSWithSubDis_v1_0_MultiThread(
             FS3D_current = np.round(FS3D[TimeInd], 5)
 
             ## Global indexes
-            GlobalIndexFS = (
-                TimeInd * nrows_org * ncols_org * MCnumber
-                + nrows_org * ncols_org * MC_current
-                + (indexesOriginal // ncols_org) * ncols_org
-                + (indexesOriginal % ncols_org)
-            )
+            GlobalIndexFS = TimeInd * nrows_org * ncols_org * MCnumber + nrows_org * ncols_org * MC_current + (indexesOriginal // ncols_org) * ncols_org + (indexesOriginal % ncols_org)
             GlobalIndexFS = np.asarray(GlobalIndexFS, dtype=int)
 
             mutex = Lock()
             mutex.acquire()
             ## Assign the min FS to the cells inside the sliding surface
             for i in GlobalIndexFS:
-                FS_All_MC[i] = (
-                    FS3D_current
-                    if ((FS_All_MC[i] == 0) or (FS_All_MC[i] > FS3D_current))
-                    else FS_All_MC[i]
-                )
+                FS_All_MC[i] = FS3D_current if ((FS_All_MC[i] == 0) or (FS_All_MC[i] > FS3D_current)) else FS_All_MC[i]
             mutex.release()
 
         print(
@@ -6500,21 +5709,7 @@ def EllipsoidFSWithSubDis_v1_0_MultiThread(
 
 
 # ---------------------------------------------------------------------------------
-def Ellipsoid_Generate_Main(
-    InZone,
-    SubDisNum,
-    nrows,
-    ncols,
-    nel,
-    cellsize,
-    EllParam,
-    SlopeInput,
-    ZmaxInput,
-    DEMInput,
-    AspectInput,
-    NoData,
-    ProblemName="",
-):
+def Ellipsoid_Generate_Main(InZone, SubDisNum, nrows, ncols, nel, cellsize, EllParam, SlopeInput, ZmaxInput, DEMInput, AspectInput, NoData, ProblemName=""):
     """
     This is main function to obtain sliding surfaces information over the area of interest.
 
@@ -6603,23 +5798,7 @@ def Ellipsoid_Generate_Main(
 
 
 # ---------------------------------------------------------------------------------
-def Ellipsoid_Generate(
-    count,
-    SubDisNum,
-    nrows,
-    ncols,
-    nel,
-    cellsize,
-    EllParam,
-    EllRow,
-    EllColumn,
-    SlopeInput,
-    ZmaxInput,
-    DEMInput,
-    AspectInput,
-    NoData,
-    ProblemName="",
-):
+def Ellipsoid_Generate(count, SubDisNum, nrows, ncols, nel, cellsize, EllParam, EllRow, EllColumn, SlopeInput, ZmaxInput, DEMInput, AspectInput, NoData, ProblemName=""):
     """
     This is the function obtaining current sliding surface information.
 
@@ -6687,12 +5866,8 @@ def Ellipsoid_Generate(
 
     ## Ellipsoidal parameters
     ## Global coordinates based on EllRow, EllColumn
-    temp = CoorG[
-        np.ix_(CoorG[:, 0] == np.array((EllRow)), np.array([False, True, True, True]))
-    ]
-    temp = temp[
-        np.ix_(temp[:, 0] == np.array((EllColumn)), np.array([False, True, True]))
-    ]
+    temp = CoorG[np.ix_(CoorG[:, 0] == np.array((EllRow)), np.array([False, True, True, True]))]
+    temp = temp[np.ix_(temp[:, 0] == np.array((EllColumn)), np.array([False, True, True]))]
     ## Coordinates accotding to the global
     EllCenterX = temp[0][0]
     EllCenterY = temp[0][1]
@@ -6727,12 +5902,8 @@ def Ellipsoid_Generate(
     elif EllAlpha_Calc == "No":
         EllAlpha = EllParam[3]
 
-    x1 = CoorEll[:, 2] * np.cos(np.radians(EllAlpha)) - CoorEll[:, 3] * np.sin(
-        np.radians(EllAlpha)
-    )
-    y1 = CoorEll[:, 3] * np.cos(np.radians(EllAlpha)) + CoorEll[:, 2] * np.sin(
-        np.radians(EllAlpha)
-    )
+    x1 = CoorEll[:, 2] * np.cos(np.radians(EllAlpha)) - CoorEll[:, 3] * np.sin(np.radians(EllAlpha))
+    y1 = CoorEll[:, 3] * np.cos(np.radians(EllAlpha)) + CoorEll[:, 2] * np.sin(np.radians(EllAlpha))
     ## Coordinates according to the ellipsoid coordinate system, e'(e rotated by EllAlpha)
     CoorEll1 = np.concatenate(
         (
@@ -6743,13 +5914,9 @@ def Ellipsoid_Generate(
         axis=1,
     )
     ## Cells inside the zone of rectangle with the dimensions of (2*Ella – 2* Ellb)
-    CellsInsideRect = CoorEll1[
-        (np.abs(CoorEll1[:, 2]) <= Ella) & (np.abs(CoorEll1[:, 3]) <= Ellb)
-    ]
+    CellsInsideRect = CoorEll1[(np.abs(CoorEll1[:, 2]) <= Ella) & (np.abs(CoorEll1[:, 3]) <= Ellb)]
     ## Slope of the ellipsoid is the average slope around the ellipsoid (a rectangular area)
-    SlopeRect = SlopeInput[
-        CellsInsideRect[:, 0].astype(int), CellsInsideRect[:, 1].astype(int)
-    ]
+    SlopeRect = SlopeInput[CellsInsideRect[:, 0].astype(int), CellsInsideRect[:, 1].astype(int)]
     SlopeRect = SlopeRect[SlopeRect != NoData]  # Remove the value of no data, NoData
     EllBeta = np.mean(SlopeRect)
 
@@ -6765,11 +5932,7 @@ def Ellipsoid_Generate(
 
     ##!!!
     ##This part is for validation problem 3
-    if (
-        ProblemName == "Pr3S1Dry"
-        or ProblemName == "Pr3S2Dry"
-        or ProblemName == "Pr3S2Wet"
-    ):
+    if ProblemName == "Pr3S1Dry" or ProblemName == "Pr3S2Dry" or ProblemName == "Pr3S2Wet":
         EllBeta = np.degrees(np.arctan(0.5))
     ##!!!
 
@@ -6825,11 +5988,7 @@ def Ellipsoid_Generate(
     Depths = np.reshape(Depths, (np.shape(CellsInside)[0], 1))
     Depths[np.isnan(Depths)] = 0
     ## DEM of the sliding surface
-    DepthDEM = EllDEMCenter - (
-        np.reshape(CellsInside[:, 2], (np.shape(CellsInside)[0], 1))
-        * np.tan(np.radians(EllBeta))
-        + Depths
-    )
+    DepthDEM = EllDEMCenter - (np.reshape(CellsInside[:, 2], (np.shape(CellsInside)[0], 1)) * np.tan(np.radians(EllBeta)) + Depths)
 
     ##!!!
     ##This part is for validation problem 2
@@ -6838,10 +5997,7 @@ def Ellipsoid_Generate(
         SlopeInput2[: int(0.58 / cellsize) + 1] = SlopeInput[1, 1]
         DEMInput2 = np.zeros((nrows))
         for i in range(nrows - 1):
-            DEMInput2[i + 1] = DEMInput2[i] + +(
-                cellsize / 2 * np.tan(np.radians(SlopeInput2[i]))
-                + cellsize / 2 * np.tan(np.radians(SlopeInput2[i + 1]))
-            )
+            DEMInput2[i + 1] = DEMInput2[i] + +(cellsize / 2 * np.tan(np.radians(SlopeInput2[i])) + cellsize / 2 * np.tan(np.radians(SlopeInput2[i + 1])))
         DEMInput2 = DEMInput2 + cellsize / 2 * np.tan(np.radians(SlopeInput[1, 1]))
         DEMInput2 = DEMInput2[::-1]
         DEMInput2 = np.transpose([DEMInput2] * ncols)
@@ -6912,9 +6068,7 @@ def Ellipsoid_Generate(
                         (nrows - 1) * cellsize + cellsize / 2 - i * cellsize,
                     ]
                 )
-        CoorG_new = np.asarray(
-            CoorG_new
-        )  # (row #, column #, x coordinate, y coordinate)
+        CoorG_new = np.asarray(CoorG_new)  # (row #, column #, x coordinate, y coordinate)
 
         ## Follow the index numbers
         IndexTemp = np.kron(IndexTemp, np.ones((2, 2)))
@@ -6982,9 +6136,7 @@ def Ellipsoid_Generate(
             #             + cellsize / 2 * np.tan(np.radians(SlopeInput[j, i]))
             #         )
             # DEMInput = DEMInput + 50  # I added but no need.
-            DEMInput = Calculate_DEM_SimpCase(
-                DEMInput, SlopeInput, nrows_org, nrows, ncols, cellsize
-            )
+            DEMInput = Calculate_DEM_SimpCase(DEMInput, SlopeInput, nrows_org, nrows, ncols, cellsize)
         ### !!!
 
         ## Determine the cell inside the ellipsoid
@@ -7007,9 +6159,7 @@ def Ellipsoid_Generate(
             Ellc,
             Ellz,
         )
-        CellsInside[np.abs(CellsInside) < 1e-10] = (
-            0  ## correction to the very low values
-        )
+        CellsInside[np.abs(CellsInside) < 1e-10] = 0  ## correction to the very low values
 
         ## Calculate the depth at a given cell
         ## If the DEM of the cell is lower than the DEM of the sliding surface, it is removed.
@@ -7028,17 +6178,11 @@ def Ellipsoid_Generate(
         Depths = np.reshape(Depths, (np.shape(CellsInside)[0], 1))
         Depths[np.isnan(Depths)] = 0
         ## DEM of the sliding surface
-        DepthDEM = EllDEMCenter - (
-            np.reshape(CellsInside[:, 2], (np.shape(CellsInside)[0], 1))
-            * np.tan(np.radians(EllBeta))
-            + Depths
-        )
+        DepthDEM = EllDEMCenter - (np.reshape(CellsInside[:, 2], (np.shape(CellsInside)[0], 1)) * np.tan(np.radians(EllBeta)) + Depths)
         # DEMdiff = (DEMInput[(int(CellsInside[i,0]),int(CellsInside[i,1]))] - DepthDEM[i,0])
         DEMdiff = (
             np.reshape(
-                DEMInput[
-                    (CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))
-                ],
+                DEMInput[(CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))],
                 (np.shape(CellsInside)[0], 1),
             )
             - DepthDEM
@@ -7082,8 +6226,7 @@ def Ellipsoid_Generate(
 
     ## Coordinate according to the e'' coordinate system (center of ellipsoid)
     xvalues = np.reshape(
-        CellsInside[:, 2] / np.cos(np.radians(EllBeta))
-        + Depths[:, 0] * np.sin(np.radians(EllBeta)),
+        CellsInside[:, 2] / np.cos(np.radians(EllBeta)) + Depths[:, 0] * np.sin(np.radians(EllBeta)),
         (np.shape(CellsInside)[0], 1),
     )
     yvalues = np.reshape(CellsInside[:, 3], (np.shape(CellsInside)[0], 1))
@@ -7095,9 +6238,7 @@ def Ellipsoid_Generate(
     # zvalues2 = np.reshape( Depths[:,0]  * np.cos(np.radians(EllBeta)) + Ellz  , (np.shape(CellsInside)[0],1) )
 
     ## Cells inside according to e'' coordinate system
-    CellsInsideE11 = np.concatenate(
-        (CellsInside[:, 0:2], xvalues, yvalues, zvalues), axis=1
-    )
+    CellsInsideE11 = np.concatenate((CellsInside[:, 0:2], xvalues, yvalues, zvalues), axis=1)
 
     ## Gradient According to e''
     GradientsE11 = []  ## Allocate
@@ -7172,13 +6313,9 @@ def Ellipsoid_Generate(
     """
     # Transform the vector to the e' coordinate system
     GradientsE1 = np.zeros(((np.shape(CellsInside)[0], 3)))
-    GradientsE1[:, 0] = GradientsE11[:, 0] * np.cos(np.radians(EllBeta)) + GradientsE11[
-        :, 2
-    ] * np.sin(np.radians(EllBeta))
+    GradientsE1[:, 0] = GradientsE11[:, 0] * np.cos(np.radians(EllBeta)) + GradientsE11[:, 2] * np.sin(np.radians(EllBeta))
     GradientsE1[:, 1] = GradientsE11[:, 1]
-    GradientsE1[:, 2] = -GradientsE11[:, 0] * np.sin(
-        np.radians(EllBeta)
-    ) + GradientsE11[:, 2] * np.cos(np.radians(EllBeta))
+    GradientsE1[:, 2] = -GradientsE11[:, 0] * np.sin(np.radians(EllBeta)) + GradientsE11[:, 2] * np.cos(np.radians(EllBeta))
 
     # ## Angle between normal vector and x' axis on XZ' plane
     # n = np.array((GradientsE1[:,0],GradientsE1[:,2])).T
@@ -7208,9 +6345,7 @@ def Ellipsoid_Generate(
 
     ## Calculation of Theta (Dip angle)
     ## Angle between 3D normal vector and Z' axis.
-    n = np.array(
-        (GradientsE1Minus[:, 0], GradientsE1Minus[:, 1], GradientsE1Minus[:, 2])
-    ).T
+    n = np.array((GradientsE1Minus[:, 0], GradientsE1Minus[:, 1], GradientsE1Minus[:, 2])).T
     vx11 = np.array([0.0, 0.0, 1.0])
     uvx11 = vx11 / np.linalg.norm(vx11)
     AngleNormal3DWE1 = []  ## Allocate. It will be assigned to Theta below.
@@ -7254,19 +6389,7 @@ def Ellipsoid_Generate(
     ## Calculation of the area by using the formulation given in Xie's or Hungr's papers.
     A = []  ## Allocate
     for i in range(np.shape(CellsInside)[0]):
-        A.append(
-            (cellsize**2)
-            * (
-                (
-                    np.sqrt(
-                        1
-                        - ((np.sin(np.radians(Tanyz[i]))) ** 2)
-                        * ((np.sin(np.radians((Tanxz[i])))) ** 2)
-                    )
-                )
-            )
-            / (((np.cos(np.radians((Tanyz[i]))))) * ((np.cos(np.radians((Tanxz[i]))))))
-        )
+        A.append((cellsize**2) * ((np.sqrt(1 - ((np.sin(np.radians(Tanyz[i]))) ** 2) * ((np.sin(np.radians((Tanxz[i])))) ** 2)))) / (((np.cos(np.radians((Tanyz[i]))))) * ((np.cos(np.radians((Tanxz[i])))))))
     A = np.asarray(A)
     A = np.reshape(A, (np.shape(CellsInside)[0], 1))
 
@@ -7348,9 +6471,7 @@ def Ellipsoid_Generate(
     Theta = np.reshape(Theta, (np.shape(CellsInside)[0], 1))
     AngleTangentXZE1 = np.reshape(AngleTangentXZE1, (np.shape(CellsInside)[0], 1))
 
-    TempSlope = SlopeInput[
-        (CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))
-    ].T[condzmax]
+    TempSlope = SlopeInput[(CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))].T[condzmax]
     ThetaAvr[condzmax] = np.reshape(TempSlope, (np.shape(TempSlope)[0], 1))
     Theta[condzmax] = np.reshape(TempSlope, (np.shape(TempSlope)[0], 1))
     AngleTangentXZE1[condzmax] = np.reshape(TempSlope, (np.shape(TempSlope)[0], 1))
@@ -7401,22 +6522,7 @@ def Ellipsoid_Generate(
 
 
 # ---------------------------------------------------------------------------------
-def Ellipsoid_Generate_Main_Multi(
-    TOTAL_PROCESSES_EllGen,
-    InZone,
-    SubDisNum,
-    nrows,
-    ncols,
-    nel,
-    cellsize,
-    EllParam,
-    SlopeInput,
-    ZmaxInput,
-    DEMInput,
-    AspectInput,
-    NoData,
-    ProblemName="",
-):
+def Ellipsoid_Generate_Main_Multi(TOTAL_PROCESSES_EllGen, InZone, SubDisNum, nrows, ncols, nel, cellsize, EllParam, SlopeInput, ZmaxInput, DEMInput, AspectInput, NoData, ProblemName=""):
     """
     This is main function to obtain sliding surfaces information over the area of interest with multiple processor.
 
@@ -7514,21 +6620,7 @@ def Ellipsoid_Generate_Main_Multi(
 
 
 # ---------------------------------------------------------------------------------
-def Ellipsoid_Generate_Multi(
-    queue_EllGen,
-    inf_list,
-    nrows,
-    ncols,
-    cellsize,
-    SubDisNum,
-    EllParam,
-    SlopeInput,
-    ZmaxInput,
-    DEMInput,
-    AspectInput,
-    NoData,
-    ProblemName="",
-):
+def Ellipsoid_Generate_Multi(queue_EllGen, inf_list, nrows, ncols, cellsize, SubDisNum, EllParam, SlopeInput, ZmaxInput, DEMInput, AspectInput, NoData, ProblemName=""):
     """
     This is the function obtaining current sliding surface information with function using multiple processor .
 
@@ -7628,14 +6720,8 @@ def Ellipsoid_Generate_Multi(
 
         ## Ellipsoidal parameters
         ## Global coordinates based on EllRow, EllColumn
-        temp = CoorG[
-            np.ix_(
-                CoorG[:, 0] == np.array((EllRow)), np.array([False, True, True, True])
-            )
-        ]
-        temp = temp[
-            np.ix_(temp[:, 0] == np.array((EllColumn)), np.array([False, True, True]))
-        ]
+        temp = CoorG[np.ix_(CoorG[:, 0] == np.array((EllRow)), np.array([False, True, True, True]))]
+        temp = temp[np.ix_(temp[:, 0] == np.array((EllColumn)), np.array([False, True, True]))]
         ## Coordinates accotding to the global
         EllCenterX = temp[0][0]
         EllCenterY = temp[0][1]
@@ -7670,12 +6756,8 @@ def Ellipsoid_Generate_Multi(
         elif EllAlpha_Calc == "No":
             EllAlpha = EllParam[3]
 
-        x1 = CoorEll[:, 2] * np.cos(np.radians(EllAlpha)) - CoorEll[:, 3] * np.sin(
-            np.radians(EllAlpha)
-        )
-        y1 = CoorEll[:, 3] * np.cos(np.radians(EllAlpha)) + CoorEll[:, 2] * np.sin(
-            np.radians(EllAlpha)
-        )
+        x1 = CoorEll[:, 2] * np.cos(np.radians(EllAlpha)) - CoorEll[:, 3] * np.sin(np.radians(EllAlpha))
+        y1 = CoorEll[:, 3] * np.cos(np.radians(EllAlpha)) + CoorEll[:, 2] * np.sin(np.radians(EllAlpha))
         ## Coordinates according to the ellipsoid coordinate system, e'(e rotated by EllAlpha)
         CoorEll1 = np.concatenate(
             (
@@ -7686,25 +6768,15 @@ def Ellipsoid_Generate_Multi(
             axis=1,
         )
         ## Cells inside the zone of rectangle with the dimensions of (2*Ella – 2* Ellb)
-        CellsInsideRect = CoorEll1[
-            (np.abs(CoorEll1[:, 2]) <= Ella) & (np.abs(CoorEll1[:, 3]) <= Ellb)
-        ]
+        CellsInsideRect = CoorEll1[(np.abs(CoorEll1[:, 2]) <= Ella) & (np.abs(CoorEll1[:, 3]) <= Ellb)]
         ## Slope of the ellipsoid is the average slope around the ellipsoid (a rectangular area)
-        SlopeRect = SlopeInput[
-            CellsInsideRect[:, 0].astype(int), CellsInsideRect[:, 1].astype(int)
-        ]
-        SlopeRect = SlopeRect[
-            SlopeRect != NoData
-        ]  # Remove the value of no data, NoData
+        SlopeRect = SlopeInput[CellsInsideRect[:, 0].astype(int), CellsInsideRect[:, 1].astype(int)]
+        SlopeRect = SlopeRect[SlopeRect != NoData]  # Remove the value of no data, NoData
         EllBeta = np.mean(SlopeRect)
 
         ##!!!
         ##This part is for validation problem 3
-        if (
-            ProblemName == "Pr3S1Dry"
-            or ProblemName == "Pr3S2Dry"
-            or ProblemName == "Pr3S2Wet"
-        ):
+        if ProblemName == "Pr3S1Dry" or ProblemName == "Pr3S2Dry" or ProblemName == "Pr3S2Wet":
             EllBeta = np.degrees(np.arctan(0.5))
         ##!!!
 
@@ -7741,9 +6813,7 @@ def Ellipsoid_Generate_Multi(
             Ellc,
             Ellz,
         )
-        CellsInside[np.abs(CellsInside) < 1e-10] = (
-            0  ## Correction to the very low values
-        )
+        CellsInside[np.abs(CellsInside) < 1e-10] = 0  ## Correction to the very low values
 
         ## Calculate the depth at a given cell
         ## If the DEM of the cell is lower than the DEM of the sliding surface, it is removed.
@@ -7762,11 +6832,7 @@ def Ellipsoid_Generate_Multi(
         Depths = np.reshape(Depths, (np.shape(CellsInside)[0], 1))
         Depths[np.isnan(Depths)] = 0
         ## DEM of the sliding surface
-        DepthDEM = EllDEMCenter - (
-            np.reshape(CellsInside[:, 2], (np.shape(CellsInside)[0], 1))
-            * np.tan(np.radians(EllBeta))
-            + Depths
-        )
+        DepthDEM = EllDEMCenter - (np.reshape(CellsInside[:, 2], (np.shape(CellsInside)[0], 1)) * np.tan(np.radians(EllBeta)) + Depths)
 
         ##!!!
         ##This part is for validation problem 2
@@ -7775,10 +6841,7 @@ def Ellipsoid_Generate_Multi(
             SlopeInput2[: int(0.58 / cellsize) + 1] = SlopeInput[1, 1]
             DEMInput2 = np.zeros((nrows))
             for i in range(nrows - 1):
-                DEMInput2[i + 1] = DEMInput2[i] + +(
-                    cellsize / 2 * np.tan(np.radians(SlopeInput2[i]))
-                    + cellsize / 2 * np.tan(np.radians(SlopeInput2[i + 1]))
-                )
+                DEMInput2[i + 1] = DEMInput2[i] + +(cellsize / 2 * np.tan(np.radians(SlopeInput2[i])) + cellsize / 2 * np.tan(np.radians(SlopeInput2[i + 1])))
             DEMInput2 = DEMInput2 + cellsize / 2 * np.tan(np.radians(SlopeInput[1, 1]))
             DEMInput2 = DEMInput2[::-1]
             DEMInput2 = np.transpose([DEMInput2] * ncols)
@@ -7788,9 +6851,7 @@ def Ellipsoid_Generate_Multi(
 
         DEMdiff = (
             np.reshape(
-                DEMInput[
-                    (CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))
-                ],
+                DEMInput[(CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))],
                 (np.shape(CellsInside)[0], 1),
             )
             - DepthDEM
@@ -7851,9 +6912,7 @@ def Ellipsoid_Generate_Multi(
                             (nrows - 1) * cellsize + cellsize / 2 - i * cellsize,
                         ]
                     )
-            CoorG_new = np.asarray(
-                CoorG_new
-            )  # (row #, column #, x coordinate, y coordinate)
+            CoorG_new = np.asarray(CoorG_new)  # (row #, column #, x coordinate, y coordinate)
 
             ## Follow the index numbers
             IndexTemp = np.kron(IndexTemp, np.ones((2, 2)))
@@ -7921,9 +6980,7 @@ def Ellipsoid_Generate_Multi(
                 #             + cellsize / 2 * np.tan(np.radians(SlopeInput[j, i]))
                 #         )
                 # DEMInput = DEMInput + 50  # I added but no need.
-                DEMInput = Calculate_DEM_SimpCase(
-                    DEMInput, SlopeInput, nrows_org, nrows, ncols, cellsize
-                )
+                DEMInput = Calculate_DEM_SimpCase(DEMInput, SlopeInput, nrows_org, nrows, ncols, cellsize)
             ### !!!
 
             ## Determine the cell inside the ellipsoid
@@ -7946,9 +7003,7 @@ def Ellipsoid_Generate_Multi(
                 Ellc,
                 Ellz,
             )
-            CellsInside[np.abs(CellsInside) < 1e-10] = (
-                0  ## correction to the very low values
-            )
+            CellsInside[np.abs(CellsInside) < 1e-10] = 0  ## correction to the very low values
 
             ## Calculate the depth at a given cell
             ## If the DEM of the cell is lower than the DEM of the sliding surface, it is removed.
@@ -7967,17 +7022,11 @@ def Ellipsoid_Generate_Multi(
             Depths = np.reshape(Depths, (np.shape(CellsInside)[0], 1))
             Depths[np.isnan(Depths)] = 0
             ## DEM of the sliding surface
-            DepthDEM = EllDEMCenter - (
-                np.reshape(CellsInside[:, 2], (np.shape(CellsInside)[0], 1))
-                * np.tan(np.radians(EllBeta))
-                + Depths
-            )
+            DepthDEM = EllDEMCenter - (np.reshape(CellsInside[:, 2], (np.shape(CellsInside)[0], 1)) * np.tan(np.radians(EllBeta)) + Depths)
             # DEMdiff = (DEMInput[(int(CellsInside[i,0]),int(CellsInside[i,1]))] - DepthDEM[i,0])
             DEMdiff = (
                 np.reshape(
-                    DEMInput[
-                        (CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))
-                    ],
+                    DEMInput[(CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))],
                     (np.shape(CellsInside)[0], 1),
                 )
                 - DepthDEM
@@ -8021,8 +7070,7 @@ def Ellipsoid_Generate_Multi(
 
         ## Coordinate according to the e'' coordinate system (center of ellipsoid)
         xvalues = np.reshape(
-            CellsInside[:, 2] / np.cos(np.radians(EllBeta))
-            + Depths[:, 0] * np.sin(np.radians(EllBeta)),
+            CellsInside[:, 2] / np.cos(np.radians(EllBeta)) + Depths[:, 0] * np.sin(np.radians(EllBeta)),
             (np.shape(CellsInside)[0], 1),
         )
         yvalues = np.reshape(CellsInside[:, 3], (np.shape(CellsInside)[0], 1))
@@ -8034,9 +7082,7 @@ def Ellipsoid_Generate_Multi(
         # zvalues2 = np.reshape( Depths[:,0]  * np.cos(np.radians(EllBeta)) + Ellz  , (np.shape(CellsInside)[0],1) )
 
         ## Cells inside according to e'' coordinate system
-        CellsInsideE11 = np.concatenate(
-            (CellsInside[:, 0:2], xvalues, yvalues, zvalues), axis=1
-        )
+        CellsInsideE11 = np.concatenate((CellsInside[:, 0:2], xvalues, yvalues, zvalues), axis=1)
 
         ## Gradient According to e''
         GradientsE11 = []  ## Allocate
@@ -8111,13 +7157,9 @@ def Ellipsoid_Generate_Multi(
         """
         # Transform the vector to the e' coordinate system
         GradientsE1 = np.zeros(((np.shape(CellsInside)[0], 3)))
-        GradientsE1[:, 0] = GradientsE11[:, 0] * np.cos(
-            np.radians(EllBeta)
-        ) + GradientsE11[:, 2] * np.sin(np.radians(EllBeta))
+        GradientsE1[:, 0] = GradientsE11[:, 0] * np.cos(np.radians(EllBeta)) + GradientsE11[:, 2] * np.sin(np.radians(EllBeta))
         GradientsE1[:, 1] = GradientsE11[:, 1]
-        GradientsE1[:, 2] = -GradientsE11[:, 0] * np.sin(
-            np.radians(EllBeta)
-        ) + GradientsE11[:, 2] * np.cos(np.radians(EllBeta))
+        GradientsE1[:, 2] = -GradientsE11[:, 0] * np.sin(np.radians(EllBeta)) + GradientsE11[:, 2] * np.cos(np.radians(EllBeta))
 
         # ## Angle between normal vector and x' axis on XZ' plane
         # n = np.array((GradientsE1[:,0],GradientsE1[:,2])).T
@@ -8147,9 +7189,7 @@ def Ellipsoid_Generate_Multi(
 
         ## Calculation of Theta (Dip angle)
         ## Angle between 3D normal vector and Z' axis.
-        n = np.array(
-            (GradientsE1Minus[:, 0], GradientsE1Minus[:, 1], GradientsE1Minus[:, 2])
-        ).T
+        n = np.array((GradientsE1Minus[:, 0], GradientsE1Minus[:, 1], GradientsE1Minus[:, 2])).T
         vx11 = np.array([0.0, 0.0, 1.0])
         uvx11 = vx11 / np.linalg.norm(vx11)
         AngleNormal3DWE1 = []  ## Allocate. It will be assigned to Theta below.
@@ -8172,13 +7212,9 @@ def Ellipsoid_Generate_Multi(
 
         ## This formulation also gives the tangents !!
         ## This can be checked to see that the above formulation and the previous calculations are resulting in the same values.
-        Tanxz = np.degrees(
-            np.arctan(np.tan(np.radians(Theta)) * np.cos(np.radians(Asp)))
-        )
+        Tanxz = np.degrees(np.arctan(np.tan(np.radians(Theta)) * np.cos(np.radians(Asp))))
         # Tanxz = AngleTangentXZE1
-        Tanyz = np.degrees(
-            np.arctan(np.tan(np.radians(Theta)) * np.sin(np.radians(Asp)))
-        )
+        Tanyz = np.degrees(np.arctan(np.tan(np.radians(Theta)) * np.sin(np.radians(Asp))))
         ## Limit the slopes and areas (by trial and error).
         Tanxz[Tanxz > 85.0] = 85.0
         Tanyz[Tanyz > 85.0] = 85.0
@@ -8197,22 +7233,7 @@ def Ellipsoid_Generate_Multi(
         ## Calculation of the area by using the formulation given in Xie's or Hungr's papers.
         A = []  ## Allocate
         for i in range(np.shape(CellsInside)[0]):
-            A.append(
-                (cellsize**2)
-                * (
-                    (
-                        np.sqrt(
-                            1
-                            - ((np.sin(np.radians(Tanyz[i]))) ** 2)
-                            * ((np.sin(np.radians((Tanxz[i])))) ** 2)
-                        )
-                    )
-                )
-                / (
-                    ((np.cos(np.radians((Tanyz[i])))))
-                    * ((np.cos(np.radians((Tanxz[i])))))
-                )
-            )
+            A.append((cellsize**2) * ((np.sqrt(1 - ((np.sin(np.radians(Tanyz[i]))) ** 2) * ((np.sin(np.radians((Tanxz[i])))) ** 2)))) / (((np.cos(np.radians((Tanyz[i]))))) * ((np.cos(np.radians((Tanxz[i])))))))
         A = np.asarray(A)
         A = np.reshape(A, (np.shape(CellsInside)[0], 1))
 
@@ -8293,9 +7314,7 @@ def Ellipsoid_Generate_Multi(
         Theta = np.reshape(Theta, (np.shape(CellsInside)[0], 1))
         AngleTangentXZE1 = np.reshape(AngleTangentXZE1, (np.shape(CellsInside)[0], 1))
 
-        TempSlope = SlopeInput[
-            (CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))
-        ].T[condzmax]
+        TempSlope = SlopeInput[(CellsInside[:, 0].astype(int), CellsInside[:, 1].astype(int))].T[condzmax]
         ThetaAvr[condzmax] = np.reshape(TempSlope, (np.shape(TempSlope)[0], 1))
         Theta[condzmax] = np.reshape(TempSlope, (np.shape(TempSlope)[0], 1))
         AngleTangentXZE1[condzmax] = np.reshape(TempSlope, (np.shape(TempSlope)[0], 1))
@@ -8350,33 +7369,7 @@ def Ellipsoid_Generate_Multi(
 
 
 # ---------------------------------------------------------------------------------
-def IndMC_Main(
-    AllInf_sorted,
-    AnalysisType,
-    FSCalType,
-    RanFieldMethod,
-    InZone,
-    Results_Directory,
-    Maxrix_Directory,
-    nrows,
-    ncols,
-    cellsize,
-    MCnumber,
-    Parameter_Means,
-    Parameter_CoVs,
-    Parameter_Dist,
-    Parameter_CorrLenX,
-    Parameter_CorrLenY,
-    SaveMat,
-    SlopeInput,
-    ZoneInput,
-    HwInput,
-    rizeroInput,
-    riInp,
-    TimeToAnalyse,
-    NoData,
-    ProblemName="",
-):
+def IndMC_Main(AllInf_sorted, AnalysisType, FSCalType, RanFieldMethod, InZone, Results_Directory, Maxrix_Directory, nrows, ncols, cellsize, MCnumber, Parameter_Means, Parameter_CoVs, Parameter_Dist, Parameter_CorrLenX, Parameter_CorrLenY, SaveMat, SlopeInput, ZoneInput, HwInput, rizeroInput, riInp, TimeToAnalyse, NoData, ProblemName=""):
     """
     ## This is the main function in which the calculations are done with single processor.
 
@@ -8493,35 +7486,7 @@ def IndMC_Main(
 
 
 # ---------------------------------------------------------------------------------
-def IndMC_FS(
-    AllInf_sorted,
-    FS_All_MC,
-    MC_current,
-    AnalysisType,
-    FSCalType,
-    RanFieldMethod,
-    InZone,
-    MCnumber,
-    Results_Directory,
-    Maxrix_Directory,
-    nrows,
-    ncols,
-    cellsize,
-    Parameter_Means,
-    Parameter_CoVs,
-    Parameter_Dist,
-    Parameter_CorrLenX,
-    Parameter_CorrLenY,
-    SaveMat,
-    SlopeInput,
-    ZoneInput,
-    HwInput,
-    rizeroInput,
-    riInp,
-    TimeToAnalyse,
-    NoData,
-    ProblemName="",
-):
+def IndMC_FS(AllInf_sorted, FS_All_MC, MC_current, AnalysisType, FSCalType, RanFieldMethod, InZone, MCnumber, Results_Directory, Maxrix_Directory, nrows, ncols, cellsize, Parameter_Means, Parameter_CoVs, Parameter_Dist, Parameter_CorrLenX, Parameter_CorrLenY, SaveMat, SlopeInput, ZoneInput, HwInput, rizeroInput, riInp, TimeToAnalyse, NoData, ProblemName=""):
     """
     This function calculates the factor of safety with single processor.
 
@@ -8613,9 +7578,7 @@ def IndMC_FS(
 
     ## Allocate FS
     # TempLst = {i:[] for i in list(range(0,nrows*ncols))}
-    FS_All_MC = [0] * (
-        np.shape(TimeToAnalyse)[0] * nrows * ncols
-    )  ### (Shared array change)
+    FS_All_MC = [0] * (np.shape(TimeToAnalyse)[0] * nrows * ncols)  ### (Shared array change)
 
     # EllCurr = 0
     for EllCurr in range(np.shape(AllInf_sorted)[0]):
@@ -8677,9 +7640,7 @@ def IndMC_FS(
             # ZmaxInput  = np.kron(ZmaxInput, np.ones((2,2)))   ## Zmax input
             # DEMInput   = np.kron(DEMInput, np.ones((2,2)))    ## DEM input
             HwInput = np.kron(HwInput, np.ones((2, 2)))  ## Ground water table input
-            rizeroInput = np.kron(
-                rizeroInput, np.ones((2, 2))
-            )  ## Background infiltration rate input
+            rizeroInput = np.kron(rizeroInput, np.ones((2, 2)))  ## Background infiltration rate input
 
             # ## Linear interpolation
             # ## Slope input
@@ -8709,9 +7670,7 @@ def IndMC_FS(
             # np.nan_to_num(rizeroInput,copy=False, nan=NoData)
 
         ## Calculate the weight using the gamma values
-        Weight = (
-            Thickness * cellsize**2 * np.expand_dims(Gamma.flatten()[indexes], axis=1)
-        )
+        Weight = Thickness * cellsize**2 * np.expand_dims(Gamma.flatten()[indexes], axis=1)
 
         ####################################
         ## Iverson (2000), infiltraion model
@@ -8734,18 +7693,11 @@ def IndMC_FS(
             )
         elif AnalysisType == "Undrained":
             # PoreWaterForce = np.zeros((np.shape(CellsInside)[0],1))
-            PoreWaterForce = [np.zeros((np.shape(CellsInside)[0], 1))] * np.shape(
-                TimeToAnalyse
-            )[0]
+            PoreWaterForce = [np.zeros((np.shape(CellsInside)[0], 1))] * np.shape(TimeToAnalyse)[0]
 
         ## !!!
         ##This part is for validation problem 1, poblem 2, problem 3 slide 1 dry, problem 3 slide 2 dry
-        if (
-            ProblemName == "Pr1"
-            or ProblemName == "Pr2"
-            or ProblemName == "Pr3S1Dry"
-            or ProblemName == "Pr3S2Dry"
-        ):
+        if ProblemName == "Pr1" or ProblemName == "Pr2" or ProblemName == "Pr3S1Dry" or ProblemName == "Pr3S2Dry":
             for corr_n in range(np.shape(PoreWaterForce)[0]):
                 ## Correction
                 PoreWaterForce[corr_n] = np.zeros((np.shape(CellsInside)[0], 1))
@@ -8950,26 +7902,16 @@ def IndMC_FS(
             FS3D_current = np.round(FS3D[TimeInd], 5)
 
             ## Global indexes
-            GlobalIndexFS = (
-                TimeInd * nrows_org * ncols_org * MCnumber
-                + nrows_org * ncols_org * MC_current
-                + indexesOriginal
-            )
+            GlobalIndexFS = TimeInd * nrows_org * ncols_org * MCnumber + nrows_org * ncols_org * MC_current + indexesOriginal
             GlobalIndexFS = np.asarray(GlobalIndexFS, dtype=int)
 
             ## Assign the min FS to the cells inside the sliding surface
             for i in GlobalIndexFS:
-                FS_All_MC[i] = (
-                    FS3D_current
-                    if ((FS_All_MC[i] == 0) or (FS_All_MC[i] > FS3D_current))
-                    else FS_All_MC[i]
-                )
+                FS_All_MC[i] = FS3D_current if ((FS_All_MC[i] == 0) or (FS_All_MC[i] > FS3D_current)) else FS_All_MC[i]
 
     ## Write FS for the current MC simulation
     FS_All_MC_InZone = np.asarray(FS_All_MC)
-    FS_All_MC_InZone = np.reshape(
-        FS_All_MC_InZone, (np.shape(TimeToAnalyse)[0], nrows, ncols)
-    )  ### (Shared array change)
+    FS_All_MC_InZone = np.reshape(FS_All_MC_InZone, (np.shape(TimeToAnalyse)[0], nrows, ncols))  ### (Shared array change)
 
     os.chdir(Results_Directory)
     NameResFile = "MC_%.4d_FS_Values" % (MC_current_org)
@@ -8980,34 +7922,7 @@ def IndMC_FS(
 
 
 # ---------------------------------------------------------------------------------
-def IndMC_Main_Multi(
-    TOTAL_PROCESSES_IndMC,
-    AllInf_sorted,
-    AnalysisType,
-    FSCalType,
-    RanFieldMethod,
-    InZone,
-    Results_Directory,
-    Maxrix_Directory,
-    nrows,
-    ncols,
-    cellsize,
-    MCnumber,
-    Parameter_Means,
-    Parameter_CoVs,
-    Parameter_Dist,
-    Parameter_CorrLenX,
-    Parameter_CorrLenY,
-    SaveMat,
-    SlopeInput,
-    ZoneInput,
-    HwInput,
-    rizeroInput,
-    riInp,
-    TimeToAnalyse,
-    NoData,
-    ProblemName="",
-):
+def IndMC_Main_Multi(TOTAL_PROCESSES_IndMC, AllInf_sorted, AnalysisType, FSCalType, RanFieldMethod, InZone, Results_Directory, Maxrix_Directory, nrows, ncols, cellsize, MCnumber, Parameter_Means, Parameter_CoVs, Parameter_Dist, Parameter_CorrLenX, Parameter_CorrLenY, SaveMat, SlopeInput, ZoneInput, HwInput, rizeroInput, riInp, TimeToAnalyse, NoData, ProblemName=""):
     """
     ## This is the main function in which the calculations are done with multiple processor.
 
@@ -9142,34 +8057,7 @@ def IndMC_Main_Multi(
 
 
 # ---------------------------------------------------------------------------------
-def IndMC_FS_Multi(
-    queue_mc_ind,
-    AllInf_sorted,
-    AnalysisType,
-    FSCalType,
-    RanFieldMethod,
-    InZone,
-    MCnumber,
-    Results_Directory,
-    Maxrix_Directory,
-    nrows,
-    ncols,
-    cellsize,
-    Parameter_Means,
-    Parameter_CoVs,
-    Parameter_Dist,
-    Parameter_CorrLenX,
-    Parameter_CorrLenY,
-    SaveMat,
-    SlopeInput,
-    ZoneInput,
-    HwInput,
-    rizeroInput,
-    riInp,
-    TimeToAnalyse,
-    NoData,
-    ProblemName="",
-):
+def IndMC_FS_Multi(queue_mc_ind, AllInf_sorted, AnalysisType, FSCalType, RanFieldMethod, InZone, MCnumber, Results_Directory, Maxrix_Directory, nrows, ncols, cellsize, Parameter_Means, Parameter_CoVs, Parameter_Dist, Parameter_CorrLenX, Parameter_CorrLenY, SaveMat, SlopeInput, ZoneInput, HwInput, rizeroInput, riInp, TimeToAnalyse, NoData, ProblemName=""):
     """
     This function calculates the factor of safety with multiple processor.
 
@@ -9389,9 +8277,7 @@ def IndMC_FS_Multi(
                 # ZmaxInput  = np.kron(ZmaxInput, np.ones((2,2)))   ## Zmax input
                 # DEMInput   = np.kron(DEMInput, np.ones((2,2)))    ## DEM input
                 HwInput = np.kron(HwInput, np.ones((2, 2)))  ## Ground water table input
-                rizeroInput = np.kron(
-                    rizeroInput, np.ones((2, 2))
-                )  ## Background infiltration rate input
+                rizeroInput = np.kron(rizeroInput, np.ones((2, 2)))  ## Background infiltration rate input
 
                 # ## Linear interpolation
                 # ## Slope input
@@ -9421,11 +8307,7 @@ def IndMC_FS_Multi(
                 # np.nan_to_num(rizeroInput,copy=False, nan=NoData)
 
             ## Calculate the weight using the gamma values
-            Weight = (
-                Thickness
-                * cellsize**2
-                * np.expand_dims(Gamma.flatten()[indexes], axis=1)
-            )
+            Weight = Thickness * cellsize**2 * np.expand_dims(Gamma.flatten()[indexes], axis=1)
 
             ####################################
             ## Iverson (2000), infiltraion model
@@ -9448,18 +8330,11 @@ def IndMC_FS_Multi(
                 )
             elif AnalysisType == "Undrained":
                 # PoreWaterForce = np.zeros((np.shape(CellsInside)[0],1))
-                PoreWaterForce = [np.zeros((np.shape(CellsInside)[0], 1))] * np.shape(
-                    TimeToAnalyse
-                )[0]
+                PoreWaterForce = [np.zeros((np.shape(CellsInside)[0], 1))] * np.shape(TimeToAnalyse)[0]
 
             ## !!!
             ##This part is for validation problem 1, poblem 2, problem 3 slide 1 dry, problem 3 slide 2 dry
-            if (
-                ProblemName == "Pr1"
-                or ProblemName == "Pr2"
-                or ProblemName == "Pr3S1Dry"
-                or ProblemName == "Pr3S2Dry"
-            ):
+            if ProblemName == "Pr1" or ProblemName == "Pr2" or ProblemName == "Pr3S1Dry" or ProblemName == "Pr3S2Dry":
                 for corr_n in range(np.shape(PoreWaterForce)[0]):
                     ## Correction
                     PoreWaterForce[corr_n] = np.zeros((np.shape(CellsInside)[0], 1))
@@ -9677,30 +8552,19 @@ def IndMC_FS_Multi(
                 ## New way to write
                 """
                 ## Index for data in a Monte Carlo, not shared
-                GlobalIndex_MC_Current = (
-                    TimeInd * nrows_org * ncols_org + indexesOriginal
-                )
+                GlobalIndex_MC_Current = TimeInd * nrows_org * ncols_org + indexesOriginal
                 GlobalIndex_MC_Current = np.asarray(GlobalIndex_MC_Current, dtype=int)
 
                 ## Assign the min FS to the cells inside the sliding surface
                 for i in GlobalIndex_MC_Current:
-                    FSValues_MC_Current[i] = (
-                        FS3D_current
-                        if (
-                            (FSValues_MC_Current[i] == 0)
-                            or (FSValues_MC_Current[i] > FS3D_current)
-                        )
-                        else FSValues_MC_Current[i]
-                    )
+                    FSValues_MC_Current[i] = FS3D_current if ((FSValues_MC_Current[i] == 0) or (FSValues_MC_Current[i] > FS3D_current)) else FSValues_MC_Current[i]
 
         """
         ## New way to write
         """
         ## Write FS of current MC simulation
         FS_All_MC_InZone = np.asarray(FSValues_MC_Current)
-        FS_All_MC_InZone = np.reshape(
-            FS_All_MC_InZone, (np.shape(TimeToAnalyse)[0], nrows, ncols)
-        )
+        FS_All_MC_InZone = np.reshape(FS_All_MC_InZone, (np.shape(TimeToAnalyse)[0], nrows, ncols))
 
         # FS_All_MC_InZone = FS_All_MC_InZone[:,InZone[0,0]:InZone[0,1]+1, InZone[1,0]:InZone[1,1]+1] ## (InZone change)
         ## Write FS for the current MC simulation
