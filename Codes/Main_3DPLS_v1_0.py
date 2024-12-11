@@ -45,8 +45,8 @@ GIS_Data_Directory = Main_Directory + "\\InputData\\Validation\\Problem1"  ## Th
 ## Create directories if they do not exist.
 if os.path.exists(Main_Directory + "\\Codes\\Matrix") == False:
     os.makedirs(Main_Directory + "\\Codes\\Matrix")
-if os.path.exists(Main_Directory + "\\Results") == False:
-    os.makedirs(Main_Directory + "\\Results")
+# if os.path.exists(Main_Directory + "\\Results") == False:
+#     os.makedirs(Main_Directory + "\\Results")
 if os.path.exists(Main_Directory + "\\InputData") == False:
     os.makedirs(Main_Directory + "\\InputData")
 if os.path.exists(Main_Directory + "\\Results_3DPLS") == False:
@@ -65,7 +65,7 @@ os.chdir(Main_Directory)  ## Change directory
 
 ## Import the function to read the ASCII grid format files
 os.chdir(Code_Directory)  ## Change directory
-from Functions_3DPLS_v1_1 import ReadData
+from Functions_3DPLS_v1_1 import ReadData, DataArrange
 
 ## Dimensions of the problem domain
 ## The user can define the dimensions or it can be read from the dem file.
@@ -117,11 +117,11 @@ for i in range(np.size(DataFiles)):
         HwInput = NumberDataAndNames[i][1]  ## Depth to ground water table (can be obtained later)
 
 ## Import the function to arrange the data (Note: Currently the function is for the case study in Oguz et al. (2022): Kvam Lansdlides)
-## Depending on the problem and needs, the function can be modified.
+# # Depending on the problem and needs, the function can be modified.
 # os.chdir(Code_Directory)
-# from Functions_3DPLS_v1_1 import DataArrange
-# ZoneInput,SlopeInput,DirectionInput,DEMInput,AspectInput,rizeroInput,ZmaxInput,HwInput = \
-#     DataArrange(ZoneInput,SlopeInput,DirectionInput,DEMInput,AspectInput,rizeroInput, NoData)
+# ZoneInput, SlopeInput, DirectionInput, DEMInput, AspectInput, rizeroInput, ZmaxInput, HwInput = DataArrange(
+#     ZoneInput, SlopeInput, DirectionInput, DEMInput, AspectInput, rizeroInput, NoData
+# )
 
 ## Rainfall input data (m/sec).
 riInp = np.array(([0.0], [86400]))  ##np.array(([7.144e-7],[86400]))
@@ -163,137 +163,37 @@ if AnalysisType == "Drained":  ## Soil properties for drained case
 
     ## Zones
     ## Mean, CoV and distribution type ("LN" or "N") of parameters for each zone.
-    Mean_cInp = np.array(
-        [
-            0.1,
-        ]
-    )  ## Mean cohesion
-    Mean_phiInp = np.array(
-        [
-            0.0,
-        ]
-    )  ## Mean friction angle
-    Mean_uwsInp = np.array(
-        [
-            1.0,
-        ]
-    )  ## Mean unit weight of soil
-    Mean_kSatInp = np.array(
-        [
-            1.00e-06,
-        ]
-    )  ## Mean saturated conductivity
-    Mean_diffusInp = np.array(
-        [
-            5.00e-06,
-        ]
-    )  ## Mean diffusivity
+    Mean_cInp = np.array([0.1])  ## Mean cohesion
+    Mean_phiInp = np.array([0.0])  ## Mean friction angle
+    Mean_uwsInp = np.array([1.0])  ## Mean unit weight of soil
+    Mean_kSatInp = np.array([0.0])  ## Mean saturated conductivity
+    Mean_diffusInp = np.array([0.0])  ## Mean diffusivity
 
-    CoV_cInp = np.array(
-        [
-            0.0,
-        ]
-    )  ## CoV of cohesion
-    CoV_phiInp = np.array(
-        [
-            0.0,
-        ]
-    )  ## CoV of friction angle
-    CoV_uwsInp = np.array(
-        [
-            0.0,
-        ]
-    )  ## CoV of unit weight of soil
-    CoV_kSatInp = np.array(
-        [
-            0.0,
-        ]
-    )  ## CoV of diffusivity
-    CoV_diffusInp = np.array(
-        [
-            0.0,
-        ]
-    )  ## CoV of saturated conductivity
+    CoV_cInp = np.array([0.0])  ## CoV of cohesion
+    CoV_phiInp = np.array([0.0])  ## CoV of friction angle
+    CoV_uwsInp = np.array([0.0])  ## CoV of unit weight of soil
+    CoV_kSatInp = np.array([0.0])  ## CoV of diffusivity
+    CoV_diffusInp = np.array([0.0])  ## CoV of saturated conductivity
 
-    Dist_cInp = np.array(
-        [
-            "LN",
-        ]
-    )  ## Distribution type of cohesion
-    Dist_phiInp = np.array(
-        [
-            "N",
-        ]
-    )  ## Distribution type of friction angle
-    Dist_uwsInp = np.array(
-        [
-            "N",
-        ]
-    )  ## Distribution type of unit weight of soil
-    Dist_kSatInp = np.array(
-        [
-            "LN",
-        ]
-    )  ## Distribution type of saturated conductivity
-    Dist_diffusInp = np.array(
-        [
-            "LN",
-        ]
-    )  ## Distribution type of saturated conductivity
+    Dist_cInp = np.array(["LN"])  ## Distribution type of cohesion
+    Dist_phiInp = np.array(["N"])  ## Distribution type of friction angle
+    Dist_uwsInp = np.array(["N"])  ## Distribution type of unit weight of soil
+    Dist_kSatInp = np.array(["LN"])  ## Distribution type of saturated conductivity
+    Dist_diffusInp = np.array(["LN"])  ## Distribution type of saturated conductivity
 
     ## Correlation lengths in X and Y directions
     ## 'inf' will model the variables as homogeneous over space but employing random values using the distribution.
     ## Parameter will be modelled as homogeneous if correlation length is even 'inf' in one direction.
-    CorrLenX_cInp = np.array(
-        [
-            "inf",
-        ]
-    )
-    CorrLenY_cInp = np.array(
-        [
-            "inf",
-        ]
-    )
-    CorrLenX_phiInp = np.array(
-        [
-            "inf",
-        ]
-    )
-    CorrLenY_phiInp = np.array(
-        [
-            "inf",
-        ]
-    )
-    CorrLenX_uwsInp = np.array(
-        [
-            "inf",
-        ]
-    )
-    CorrLenY_uwsInp = np.array(
-        [
-            "inf",
-        ]
-    )
-    CorrLenX_kSatInp = np.array(
-        [
-            "inf",
-        ]
-    )
-    CorrLenY_kSatInp = np.array(
-        [
-            "inf",
-        ]
-    )
-    CorrLenX_diffusInp = np.array(
-        [
-            "inf",
-        ]
-    )
-    CorrLenY_diffusInp = np.array(
-        [
-            "inf",
-        ]
-    )
+    CorrLenX_cInp = np.array(["inf"])
+    CorrLenY_cInp = np.array(["inf"])
+    CorrLenX_phiInp = np.array(["inf"])
+    CorrLenY_phiInp = np.array(["inf"])
+    CorrLenX_uwsInp = np.array(["inf"])
+    CorrLenY_uwsInp = np.array(["inf"])
+    CorrLenX_kSatInp = np.array(["inf"])
+    CorrLenY_kSatInp = np.array(["inf"])
+    CorrLenX_diffusInp = np.array(["inf"])
+    CorrLenY_diffusInp = np.array(["inf"])
 
     ## Allocate all parameter information
     Parameter_Means = np.array([[Mean_cInp], [Mean_phiInp], [Mean_uwsInp], [Mean_kSatInp], [Mean_diffusInp]])
@@ -305,62 +205,22 @@ if AnalysisType == "Drained":  ## Soil properties for drained case
 elif AnalysisType == "Undrained":  ## Soil properties for undrained case
 
     ## Mean, CoV and distribution type ("LN" or "N") of parameters for each zone.
-    Mean_SuInp = np.array(
-        [
-            40.0,
-        ]
-    )  ## Mean undrained shear strength
-    Mean_uwsInp = np.array(
-        [
-            20,
-        ]
-    )  ## Mean unit weight of soil
+    Mean_SuInp = np.array([40.0])  ## Mean undrained shear strength
+    Mean_uwsInp = np.array([20])  ## Mean unit weight of soil
 
-    CoV_SuInp = np.array(
-        [
-            0.0,
-        ]
-    )  ## CoV of undrained shear strengt
-    CoV_uwsInp = np.array(
-        [
-            0.0,
-        ]
-    )  ## CoV of unit weight of soil
+    CoV_SuInp = np.array([0.0])  ## CoV of undrained shear strengt
+    CoV_uwsInp = np.array([0.0])  ## CoV of unit weight of soil
 
-    Dist_SuInp = np.array(
-        [
-            "LN",
-        ]
-    )  ## CoV of undrained shear strengt
-    Dist_uwsInp = np.array(
-        [
-            "N",
-        ]
-    )  ## CoV of unit weight of soil
+    Dist_SuInp = np.array(["LN"])  ## CoV of undrained shear strengt
+    Dist_uwsInp = np.array(["N"])  ## CoV of unit weight of soil
 
     ## Correlation lengths in X and Y directions
     ## 'inf' will model the variables as homogeneous over space but employing random values using the distribution.
     ## Parameter will be modelled as homogeneous if correlation length is even 'inf' in one direction.
-    CorrLenX_SuInp = np.array(
-        [
-            "inf",
-        ]
-    )
-    CorrLenY_SuInp = np.array(
-        [
-            "inf",
-        ]
-    )
-    CorrLenX_uwsInp = np.array(
-        [
-            "inf",
-        ]
-    )
-    CorrLenY_uwsInp = np.array(
-        [
-            "inf",
-        ]
-    )
+    CorrLenX_SuInp = np.array(["inf"])
+    CorrLenY_SuInp = np.array(["inf"])
+    CorrLenX_uwsInp = np.array(["inf"])
+    CorrLenY_uwsInp = np.array(["inf"])
 
     ## Allocate all parameter information
     Parameter_Means = np.array([[Mean_SuInp], [Mean_uwsInp]])
@@ -476,7 +336,40 @@ if __name__ == "__main__":
     if Multiprocessing_Option == "C-SP-SP":
         print("Run option: (SP)", Multiprocessing_Option)
 
-        FSCalcEllipsoid_v1_0_SingleRrocess(AnalysisType, FSCalType, RanFieldMethod, InZone, SubDisNum, Results_Directory, Code_Directory, Maxrix_Directory, nrows, ncols, nel, cellsize, EllParam, MCnumber, Parameter_Means, Parameter_CoVs, Parameter_Dist, Parameter_CorrLenX, Parameter_CorrLenY, SaveMat, ZoneInput, SlopeInput, ZmaxArg, ZmaxInput, DEMInput, HwInput, rizeroInput, riInp, AspectInput, TimeToAnalyse, NoData, ProblemName)
+        FSCalcEllipsoid_v1_0_SingleRrocess(
+            AnalysisType,
+            FSCalType,
+            RanFieldMethod,
+            InZone,
+            SubDisNum,
+            Results_Directory,
+            Code_Directory,
+            Maxrix_Directory,
+            nrows,
+            ncols,
+            nel,
+            cellsize,
+            EllParam,
+            MCnumber,
+            Parameter_Means,
+            Parameter_CoVs,
+            Parameter_Dist,
+            Parameter_CorrLenX,
+            Parameter_CorrLenY,
+            SaveMat,
+            ZoneInput,
+            SlopeInput,
+            ZmaxArg,
+            ZmaxInput,
+            DEMInput,
+            HwInput,
+            rizeroInput,
+            riInp,
+            AspectInput,
+            TimeToAnalyse,
+            NoData,
+            ProblemName,
+        )
 
         ## Time after the main calculation part of the code
         t2 = time.time()
@@ -487,7 +380,42 @@ if __name__ == "__main__":
         print("Run option: (MP)", Multiprocessing_Option)
 
         FSCalcEllipsoid_v1_0_MutiProcess(
-            Multiprocessing_Option, TOTAL_PROCESSES_MC, TOTAL_PROCESSES_ELL, TOTAL_THREADS_ELL, AnalysisType, FSCalType, RanFieldMethod, InZone, SubDisNum, Results_Directory, Code_Directory, Maxrix_Directory, nrows, ncols, nel, cellsize, EllParam, MCnumber, Parameter_Means, Parameter_CoVs, Parameter_Dist, Parameter_CorrLenX, Parameter_CorrLenY, SaveMat, ZoneInput, SlopeInput, ZmaxArg, ZmaxInput, DEMInput, HwInput, rizeroInput, riInp, AspectInput, TimeToAnalyse, NoData, ProblemName
+            Multiprocessing_Option,
+            TOTAL_PROCESSES_MC,
+            TOTAL_PROCESSES_ELL,
+            TOTAL_THREADS_ELL,
+            AnalysisType,
+            FSCalType,
+            RanFieldMethod,
+            InZone,
+            SubDisNum,
+            Results_Directory,
+            Code_Directory,
+            Maxrix_Directory,
+            nrows,
+            ncols,
+            nel,
+            cellsize,
+            EllParam,
+            MCnumber,
+            Parameter_Means,
+            Parameter_CoVs,
+            Parameter_Dist,
+            Parameter_CorrLenX,
+            Parameter_CorrLenY,
+            SaveMat,
+            ZoneInput,
+            SlopeInput,
+            ZmaxArg,
+            ZmaxInput,
+            DEMInput,
+            HwInput,
+            rizeroInput,
+            riInp,
+            AspectInput,
+            TimeToAnalyse,
+            NoData,
+            ProblemName,
         )
         ## Time after the main calculation part of the code
         t2 = time.time()
@@ -502,7 +430,9 @@ if __name__ == "__main__":
         print("Run option: (Sliding surfaces: SP)", Multiprocessing_Option)
 
         ## Singleprocessing generation of ellipsoidal sliding surfaces
-        AllInf = Ellipsoid_Generate_Main(InZone, SubDisNum, nrows, ncols, nel, cellsize, EllParam, SlopeInput, ZmaxInput, DEMInput, AspectInput, NoData, ProblemName)
+        AllInf = Ellipsoid_Generate_Main(
+            InZone, SubDisNum, nrows, ncols, nel, cellsize, EllParam, SlopeInput, ZmaxInput, DEMInput, AspectInput, NoData, ProblemName
+        )
 
         ## Save sliding surfaces' information
         AllInf = AllInf[:]
@@ -522,7 +452,22 @@ if __name__ == "__main__":
         print("Run option: (Sliding surfaces: MP)", Multiprocessing_Option)
 
         ## Multiprocessing generation of ellipsoidal sliding surfaces
-        AllInf = Ellipsoid_Generate_Main_Multi(TOTAL_PROCESSES_EllGen, InZone, SubDisNum, nrows, ncols, nel, cellsize, EllParam, SlopeInput, ZmaxInput, DEMInput, AspectInput, NoData, ProblemName)
+        AllInf = Ellipsoid_Generate_Main_Multi(
+            TOTAL_PROCESSES_EllGen,
+            InZone,
+            SubDisNum,
+            nrows,
+            ncols,
+            nel,
+            cellsize,
+            EllParam,
+            SlopeInput,
+            ZmaxInput,
+            DEMInput,
+            AspectInput,
+            NoData,
+            ProblemName,
+        )
 
         ## Save sliding surfaces' information
         AllInf = AllInf[:]
@@ -545,7 +490,33 @@ if __name__ == "__main__":
     if Multiprocessing_Option in ["S-SP-SP", "S-MP-SP"]:
         print("Run option: (MC simulations: SP)", Multiprocessing_Option)
 
-        IndMC_Main(AllInf_sorted, AnalysisType, FSCalType, RanFieldMethod, InZone, Results_Directory, Maxrix_Directory, nrows, ncols, cellsize, MCnumber, Parameter_Means, Parameter_CoVs, Parameter_Dist, Parameter_CorrLenX, Parameter_CorrLenY, SaveMat, SlopeInput, ZoneInput, HwInput, rizeroInput, riInp, TimeToAnalyse, NoData, ProblemName)
+        IndMC_Main(
+            AllInf_sorted,
+            AnalysisType,
+            FSCalType,
+            RanFieldMethod,
+            InZone,
+            Results_Directory,
+            Maxrix_Directory,
+            nrows,
+            ncols,
+            cellsize,
+            MCnumber,
+            Parameter_Means,
+            Parameter_CoVs,
+            Parameter_Dist,
+            Parameter_CorrLenX,
+            Parameter_CorrLenY,
+            SaveMat,
+            SlopeInput,
+            ZoneInput,
+            HwInput,
+            rizeroInput,
+            riInp,
+            TimeToAnalyse,
+            NoData,
+            ProblemName,
+        )
 
         ## Time elapsed for Monte Carlo simulations
         t3 = time.time()
@@ -555,7 +526,34 @@ if __name__ == "__main__":
     if Multiprocessing_Option in ["S-SP-MP", "S-MP-MP"]:
         print("Run option: (MC simulations: MP)", Multiprocessing_Option)
 
-        IndMC_Main_Multi(TOTAL_PROCESSES_IndMC, AllInf_sorted, AnalysisType, FSCalType, RanFieldMethod, InZone, Results_Directory, Maxrix_Directory, nrows, ncols, cellsize, MCnumber, Parameter_Means, Parameter_CoVs, Parameter_Dist, Parameter_CorrLenX, Parameter_CorrLenY, SaveMat, SlopeInput, ZoneInput, HwInput, rizeroInput, riInp, TimeToAnalyse, NoData, ProblemName)
+        IndMC_Main_Multi(
+            TOTAL_PROCESSES_IndMC,
+            AllInf_sorted,
+            AnalysisType,
+            FSCalType,
+            RanFieldMethod,
+            InZone,
+            Results_Directory,
+            Maxrix_Directory,
+            nrows,
+            ncols,
+            cellsize,
+            MCnumber,
+            Parameter_Means,
+            Parameter_CoVs,
+            Parameter_Dist,
+            Parameter_CorrLenX,
+            Parameter_CorrLenY,
+            SaveMat,
+            SlopeInput,
+            ZoneInput,
+            HwInput,
+            rizeroInput,
+            riInp,
+            TimeToAnalyse,
+            NoData,
+            ProblemName,
+        )
 
         ## Time elapsed for Monte Carlo simulations
         t3 = time.time()
@@ -601,17 +599,17 @@ if __name__ == "__main__":
 
     # os.chdir(Results_Directory)
 
-    # ## Calculate the mean
-    # MeanFSData = []
-    # for i in range(np.shape(Results_Time)[0]):
-    #     Temp = np.mean(Results_Time[i],axis=0) ## Take the average over Monte Carlo simulations
-    #     Temp = np.reshape(Temp, (nrows,ncols))
-    #     MeanFSData.append(Temp)
+    ## Calculate the mean
+    MeanFSData = []
+    for i in range(np.shape(Results_Time)[0]):
+        Temp = np.mean(Results_Time[i], axis=0)  ## Take the average over Monte Carlo simulations
+        Temp = np.reshape(Temp, (nrows, ncols))
+        MeanFSData.append(Temp)
 
-    # ## Select a time instance
-    # MeanFSData = MeanFSData[0]
-    # MeanFSData[MeanFSData==0]=np.nan
-
+    ## Select a time instance
+    MeanFSData = MeanFSData[0]
+    MeanFSData[MeanFSData == 0] = np.nan
+    print(np.unique(MeanFSData[~np.isnan(MeanFSData)]))
     # ## Draw mean FS map
 
     # ## Color map can be modified and newcmp can be used.

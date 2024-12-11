@@ -83,21 +83,21 @@ For Validation Problem – 1, adjust the following parameters in the main code:
 | 140          | `AnalysisType`          | `'Drained'`                                                |
 | 141          | `FSCalType`             | `'Bishop3D'`                                               |
 | 166          | `Mean_cInp`             | `np.array([0.1])`                                          |
-| 171          | `Mean_phiInp`           | `np.array([0.0])`                                          |
-| 176          | `Mean_uwsInp`           | `np.array([1.0])`                                          |
-| 192-216      | `CoV_cInp`<br>`CoV_phiInp`<br>`CoV_uwsInp`<br>`CoV_kSatInp`<br>`CoV_diffusInp` | `np.array([0.0])` |
-| 247-296      | `CorrLenX_cInp`<br>`CorrLenY_cInp`<br>`CorrLenX_phiInp`<br>`CorrLenY_phiInp`<br>`CorrLenX_uwsInp`<br>`CorrLenY_uwsInp`<br>`CorrLenX_kSatInp`<br>`CorrLenY_kSatInp`<br>`CorrLenX_diffusInp`<br>`CorrLenY_diffusInp` | `np.array(['inf'])` |
-| 380          | `Ella`                  | `1`                                                        |
-| 382          | `Ellb`                  | `1`                                                        |
-| 384          | `Ellc`                  | `1`                                                        |
-| 387          | `EllAlpha`              | `90`                                                       |
-| 388          | `EllAlpha_Calc`         | `"No"`                                                     |
-| 390          | `Ellz`                  | `0.5`                                                      |
-| 398          | `InZone`                | `np.array(([int(nrows/2), int(nrows/2)], [int(ncols/2), int(ncols/2)]))` |
-| 407          | `TimeToAnalyse`         | `np.array((0,))`                                           |
-| 413          | `SubDisNum`             | `0`                                                        |
-| 425          | `ProblemName`           | `'Pr1'`                                                    |
-| 451          | `Multiprocessing_Option`| `Multiprocessing_Option_List[0]` or `"C-SP-SP"`            |
+| 167          | `Mean_phiInp`           | `np.array([0.0])`                                          |
+| 168          | `Mean_uwsInp`           | `np.array([1.0])`                                          |
+| 172-176      | `CoV_cInp`<br>`CoV_phiInp`<br>`CoV_uwsInp`<br>`CoV_kSatInp`<br>`CoV_diffusInp` | `np.array([0.0])` |
+| 187-196      | `CorrLenX_cInp`<br>`CorrLenY_cInp`<br>`CorrLenX_phiInp`<br>`CorrLenY_phiInp`<br>`CorrLenX_uwsInp`<br>`CorrLenY_uwsInp`<br>`CorrLenX_kSatInp`<br>`CorrLenY_kSatInp`<br>`CorrLenX_diffusInp`<br>`CorrLenY_diffusInp` | `np.array(['inf'])` |
+| 240          | `Ella`                  | `1`                                                        |
+| 242          | `Ellb`                  | `1`                                                        |
+| 244          | `Ellc`                  | `1`                                                        |
+| 247          | `EllAlpha`              | `90`                                                       |
+| 248          | `EllAlpha_Calc`         | `"No"`                                                     |
+| 250          | `Ellz`                  | `0.5`                                                      |
+| 258          | `InZone`                | `np.array(([int(nrows/2), int(nrows/2)], [int(ncols/2), int(ncols/2)]))` |
+| 267          | `TimeToAnalyse`         | `np.array((0,))`                                           |
+| 273          | `SubDisNum`             | `0`                                                        |
+| 285          | `ProblemName`           | `'Pr1'`                                                    |
+| 311          | `Multiprocessing_Option`| `Multiprocessing_Option_List[0]` or `"C-SP-SP"`            |
 
 ### Additional Notes
 - **Dry Condition Simulation**: For `ProblemName` defined as `'Pr1'`, pore water pressures are set to zero to simulate dry conditions.
@@ -117,21 +117,21 @@ For Validation Problem – 2, modify the following parameters in the main code:
 | 140          | `AnalysisType`          | `'Drained'`                                                |
 | 141          | `FSCalType`             | `'Bishop3D'`                                               |
 | 166          | `Mean_cInp`             | `np.array([0.116])`                                        |
-| 171          | `Mean_phiInp`           | `np.array([15.0])`                                         |
-| 176          | `Mean_uwsInp`           | `np.array([1.0])`                                          |
-| 192-216      | `CoV_cInp`<br>`CoV_phiInp`<br>`CoV_uwsInp`<br>`CoV_kSatInp`<br>`CoV_diffusInp` | `np.array([0.0])` |
-| 247-296      | `CorrLenX_cInp`<br>`CorrLenY_cInp`<br>`CorrLenX_phiInp`<br>`CorrLenY_phiInp`<br>`CorrLenX_uwsInp`<br>`CorrLenY_uwsInp`<br>`CorrLenX_kSatInp`<br>`CorrLenY_kSatInp`<br>`CorrLenX_diffusInp`<br>`CorrLenY_diffusInp` | `np.array(['inf'])` |
-| 380          | `Ella`                  | `2.02`                                                     |
-| 382          | `Ellb`                  | `2.02`                                                     |
-| 384          | `Ellc`                  | `2.02`                                                     |
-| 387          | `EllAlpha`              | `90`                                                       |
-| 388          | `EllAlpha_Calc`         | `"No"`                                                     |
-| 390          | `Ellz`                  | `1.556`                                                    |
-| 398          | `InZone`                | `np.array(([95,95], [149,149]))`                           |
-| 407          | `TimeToAnalyse`         | `np.array((0,))`                                           |
-| 413          | `SubDisNum`             | `0`                                                        |
-| 425          | `ProblemName`           | `'Pr2'`                                                    |
-| 451          | `Multiprocessing_Option`| `Multiprocessing_Option_List[0]` or `"C-SP-SP"`            |
+| 167          | `Mean_phiInp`           | `np.array([15.0])`                                         |
+| 168          | `Mean_uwsInp`           | `np.array([1.0])`                                          |
+| 172-176      | `CoV_cInp`<br>`CoV_phiInp`<br>`CoV_uwsInp`<br>`CoV_kSatInp`<br>`CoV_diffusInp` | `np.array([0.0])` |
+| 187-196      | `CorrLenX_cInp`<br>`CorrLenY_cInp`<br>`CorrLenX_phiInp`<br>`CorrLenY_phiInp`<br>`CorrLenX_uwsInp`<br>`CorrLenY_uwsInp`<br>`CorrLenX_kSatInp`<br>`CorrLenY_kSatInp`<br>`CorrLenX_diffusInp`<br>`CorrLenY_diffusInp` | `np.array(['inf'])` |
+| 240          | `Ella`                  | `2.02`                                                     |
+| 242          | `Ellb`                  | `2.02`                                                     |
+| 244          | `Ellc`                  | `2.02`                                                     |
+| 247          | `EllAlpha`              | `90`                                                       |
+| 248          | `EllAlpha_Calc`         | `"No"`                                                     |
+| 250          | `Ellz`                  | `1.556`                                                    |
+| 258          | `InZone`                | `np.array(([95,95], [149,149]))`                           |
+| 267          | `TimeToAnalyse`         | `np.array((0,))`                                           |
+| 273          | `SubDisNum`             | `0`                                                        |
+| 285          | `ProblemName`           | `'Pr2'`                                                    |
+| 311          | `Multiprocessing_Option`| `Multiprocessing_Option_List[0]` or `"C-SP-SP"`            |
 
 ### Additional Notes
 - **Dry Condition Simulation**: For `ProblemName` defined as `'Pr2'`, pore water pressures are set to zero to simulate dry conditions.
@@ -153,21 +153,21 @@ For Validation Problem – 3, modify the following parameters in the main code:
 | 140          | `AnalysisType`          | `'Drained'`                                                |
 | 141          | `FSCalType`             | `'Bishop3D'`                                               |
 | 166          | `Mean_cInp`             | `np.array([28.7])`                                         |
-| 171          | `Mean_phiInp`           | `np.array([20.0])`                                         |
-| 176          | `Mean_uwsInp`           | `np.array([18.84])`                                        |
-| 192-216      | `CoV_cInp`<br>`CoV_phiInp`<br>`CoV_uwsInp`<br>`CoV_kSatInp`<br>`CoV_diffusInp` | `np.array([0.0])` |
-| 247-296      | `CorrLenX_cInp`<br>`CorrLenY_cInp`<br>`CorrLenX_phiInp`<br>`CorrLenY_phiInp`<br>`CorrLenX_uwsInp`<br>`CorrLenY_uwsInp`<br>`CorrLenX_kSatInp`<br>`CorrLenY_kSatInp`<br>`CorrLenX_diffusInp`<br>`CorrLenY_diffusInp` | `np.array(['inf'])` |
-| 380          | `Ella`                  | `24.38`                                                    |
-| 382          | `Ellb`                  | `24.38`                                                    |
-| 384          | `Ellc`                  | `24.38`                                                    |
-| 387          | `EllAlpha`              | `90`                                                       |
-| 388          | `EllAlpha_Calc`         | `"No"`                                                     |
-| 390          | `Ellz`                  | `16.35`                                                    |
-| 398          | `InZone`                | `np.array(([int(25.5/cellsize), int(25.5/cellsize)], [int(ncols/2-1), int(ncols/2-1)]))` |
-| 407          | `TimeToAnalyse`         | `np.array((0,))`                                           |
-| 413          | `SubDisNum`             | `0`                                                        |
-| 425          | `ProblemName`           | `'Pr3S1Dry'` or `'Pr3S2Dry'` or `'Pr3S2Wet'`              |
-| 451          | `Multiprocessing_Option`| `Multiprocessing_Option_List[0]` or `"C-SP-SP"`            |
+| 167          | `Mean_phiInp`           | `np.array([20.0])`                                         |
+| 168          | `Mean_uwsInp`           | `np.array([18.84])`                                        |
+| 172-176      | `CoV_cInp`<br>`CoV_phiInp`<br>`CoV_uwsInp`<br>`CoV_kSatInp`<br>`CoV_diffusInp` | `np.array([0.0])` |
+| 187-196      | `CorrLenX_cInp`<br>`CorrLenY_cInp`<br>`CorrLenX_phiInp`<br>`CorrLenY_phiInp`<br>`CorrLenX_uwsInp`<br>`CorrLenY_uwsInp`<br>`CorrLenX_kSatInp`<br>`CorrLenY_kSatInp`<br>`CorrLenX_diffusInp`<br>`CorrLenY_diffusInp` | `np.array(['inf'])` |
+| 240          | `Ella`                  | `24.38`                                                    |
+| 242          | `Ellb`                  | `24.38`                                                    |
+| 244          | `Ellc`                  | `24.38`                                                    |
+| 247          | `EllAlpha`              | `90`                                                       |
+| 248          | `EllAlpha_Calc`         | `"No"`                                                     |
+| 250          | `Ellz`                  | `16.35`                                                    |
+| 258          | `InZone`                | `np.array(([int(25.5/cellsize), int(25.5/cellsize)], [int(ncols/2-1), int(ncols/2-1)]))` |
+| 267          | `TimeToAnalyse`         | `np.array((0,))`                                           |
+| 273          | `SubDisNum`             | `0`                                                        |
+| 285          | `ProblemName`           | `'Pr3S1Dry'` or `'Pr3S2Dry'` or `'Pr3S2Wet'`              |
+| 311          | `Multiprocessing_Option`| `Multiprocessing_Option_List[0]` or `"C-SP-SP"`            |
 
 ### Additional Notes
 
@@ -204,41 +204,41 @@ For the simplified case problem, modify the following parameters in the main cod
 | 147          | `RanFieldMethod`        | `'CMD'`                                                     |
 | 149          | `SaveMat`               | `'YES'`                                                     |
 | 166          | `Mean_cInp`             | `np.array([6])`                                            |
-| 171          | `Mean_phiInp`           | `np.array([40])`                                           |
-| 176          | `Mean_uwsInp`           | `np.array([20])`                                           |
-| 181          | `Mean_kSatInp`          | `np.array([1.00E-06])`                                     |
-| 186          | `Mean_diffusInp`        | `np.array([5.00E-06])`                                     |
-| 192          | `CoV_cInp`              | `np.array([0.1])` - `np.array([0.2])` - `np.array([0.3])`  |
-| 197          | `CoV_phiInp`            | `np.array([0.05])` - `np.array([0.10])` - `np.array([0.15])` |
-| 202-216      | `CoV_uwsInp`<br>`CoV_kSatInp`<br>`CoV_diffusInp` | `np.array([0.0])` |
-| 218          | `Dist_cInp`             | `np.array(['LN'])`                                         |
-| 223          | `Dist_phiInp`           | `np.array(['N'])`                                          |
-| 228          | `Dist_uwsInp`           | `np.array(['N'])`                                          |
-| 233          | `Dist_kSatInp`          | `np.array(['LN'])`                                         |
-| 238          | `Dist_diffusInp`        | `np.array(['LN'])`                                         |
-| 247-266      | `CorrLenX_cInp`<br>`CorrLenY_cInp`<br>`CorrLenX_phiInp`<br>`CorrLenY_phiInp` | `np.array([0])` - `np.array([10])` - `np.array([20])` - `np.array([50])` - `np.array([100])` - `np.array([200])` - `np.array([500])` - `np.array([1000])` |
-| 267-296      | `CorrLenX_uwsInp`<br>`CorrLenY_uwsInp`<br>`CorrLenX_kSatInp`<br>`CorrLenY_kSatInp`<br>`CorrLenX_diffusInp`<br>`CorrLenY_diffusInp` | `np.array(['inf'])` |
-| 308          | `Mean_SuInp`            | `40`                                                       |
-| 313          | `Mean_uwsInp`           | `20`                                                       |
-| 319          | `CoV_SuInp`             | `np.array([0.1])` - `np.array([0.2])` - `np.array([0.3])`  |
-| 324          | `CoV_uwsInp`            | `np.array([0.0])`                                          |
-| 330          | `Dist_SuInp`            | `np.array(['LN'])`                                         |
-| 335          | `Dist_uwsInp`           | `np.array(['N'])`                                          |
-| 344-353      | `CorrLenX_SuInp`<br>`CorrLenY_SuInp` | `np.array([0])` - `np.array([10])` - `np.array([20])` - `np.array([50])` - `np.array([100])` - `np.array([200])` - `np.array([500])` - `np.array([1000])` |
-| 354-363      | `CorrLenX_uwsInp`<br>`CorrLenY_uwsInp` | `np.array(['inf'])` |
-| 380          | `Ella`                  | `20`                                                       |
-| 382          | `Ellb`                  | `20`                                                       |
-| 384          | `Ellc`                  | `2`                                                        |
-| 387          | `EllAlpha`              | `90`                                                       |
-| 388          | `EllAlpha_Calc`         | `"No"`                                                     |
-| 390          | `Ellz`                  | `0`                                                        |
-| 398          | `InZone`                | `np.array(([10,29], [10,29]))`                             |
-| 407          | `TimeToAnalyse`         | `np.array((0,))`                                           |
-| 413          | `SubDisNum`             | `200`                                                      |
-| 425          | `ProblemName`           | `'SimpCase'`                                               |
-| 451          | `Multiprocessing_Option`| `Multiprocessing_Option_List[7]` or `"S-MP-MP"`            |
-| 459          | `TOTAL_PROCESSES_IndMC` | `4` (depends on the capacity of the computer)              |
-| 460          | `TOTAL_PROCESSES_EllGen`| `4` (depends on the capacity of the computer)              |
+| 167          | `Mean_phiInp`           | `np.array([40])`                                           |
+| 168          | `Mean_uwsInp`           | `np.array([20])`                                           |
+| 169          | `Mean_kSatInp`          | `np.array([1.00E-06])`                                     |
+| 170          | `Mean_diffusInp`        | `np.array([5.00E-06])`                                     |
+| 172          | `CoV_cInp`              | `np.array([0.1])` - `np.array([0.2])` - `np.array([0.3])`  |
+| 173          | `CoV_phiInp`            | `np.array([0.05])` - `np.array([0.10])` - `np.array([0.15])` |
+| 174-176      | `CoV_uwsInp`<br>`CoV_kSatInp`<br>`CoV_diffusInp` | `np.array([0.0])` |
+| 178          | `Dist_cInp`             | `np.array(['LN'])`                                         |
+| 179          | `Dist_phiInp`           | `np.array(['N'])`                                          |
+| 180          | `Dist_uwsInp`           | `np.array(['N'])`                                          |
+| 181          | `Dist_kSatInp`          | `np.array(['LN'])`                                         |
+| 182          | `Dist_diffusInp`        | `np.array(['LN'])`                                         |
+| 187-190      | `CorrLenX_cInp`<br>`CorrLenY_cInp`<br>`CorrLenX_phiInp`<br>`CorrLenY_phiInp` | `np.array([0])` - `np.array([10])` - `np.array([20])` - `np.array([50])` - `np.array([100])` - `np.array([200])` - `np.array([500])` - `np.array([1000])` |
+| 191-196      | `CorrLenX_uwsInp`<br>`CorrLenY_uwsInp`<br>`CorrLenX_kSatInp`<br>`CorrLenY_kSatInp`<br>`CorrLenX_diffusInp`<br>`CorrLenY_diffusInp` | `np.array(['inf'])` |
+| 208          | `Mean_SuInp`            | `40`                                                       |
+| 209          | `Mean_uwsInp`           | `20`                                                       |
+| 211          | `CoV_SuInp`             | `np.array([0.1])` - `np.array([0.2])` - `np.array([0.3])`  |
+| 212          | `CoV_uwsInp`            | `np.array([0.0])`                                          |
+| 214          | `Dist_SuInp`            | `np.array(['LN'])`                                         |
+| 215          | `Dist_uwsInp`           | `np.array(['N'])`                                          |
+| 220-221      | `CorrLenX_SuInp`<br>`CorrLenY_SuInp` | `np.array([0])` - `np.array([10])` - `np.array([20])` - `np.array([50])` - `np.array([100])` - `np.array([200])` - `np.array([500])` - `np.array([1000])` |
+| 222-223      | `CorrLenX_uwsInp`<br>`CorrLenY_uwsInp` | `np.array(['inf'])` |
+| 240          | `Ella`                  | `20`                                                       |
+| 242          | `Ellb`                  | `20`                                                       |
+| 244          | `Ellc`                  | `2`                                                        |
+| 247          | `EllAlpha`              | `90`                                                       |
+| 248          | `EllAlpha_Calc`         | `"No"`                                                     |
+| 250          | `Ellz`                  | `0`                                                        |
+| 258          | `InZone`                | `np.array(([10,29], [10,29]))`                             |
+| 267          | `TimeToAnalyse`         | `np.array((0,))`                                           |
+| 273          | `SubDisNum`             | `200`                                                      |
+| 285          | `ProblemName`           | `'SimpCase'`                                               |
+| 311          | `Multiprocessing_Option`| `Multiprocessing_Option_List[7]` or `"S-MP-MP"`            |
+| 319          | `TOTAL_PROCESSES_IndMC` | `4` (depends on the capacity of the computer)              |
+| 320          | `TOTAL_PROCESSES_EllGen`| `4` (depends on the capacity of the computer)              |
 
 ### Additional Notes
 - **Sub-Discretization**: During the sub-discretization, the DEM data is recalculated instead of using `np.kron` when `ProblemName` is defined as `'SimpCase'`.
@@ -260,38 +260,38 @@ For the Kvam Landslides case study, the following parameters in the code should 
 | 149          | `SaveMat`               | `'YES'`                                                     |
 | 152          | `ZmaxVar`               | `'NO'`                                                      |
 | 166          | `Mean_cInp`             | `np.array([4.0])`                                          |
-| 171          | `Mean_phiInp`           | `np.array([32.0])`                                         |
-| 176          | `Mean_uwsInp`           | `np.array([20.0])`                                         |
-| 181          | `Mean_kSatInp`          | `np.array([1.00E-06])`                                     |
-| 186          | `Mean_diffusInp`        | `np.array([5.00E-06])`                                     |
-| 192          | `CoV_cInp`              | `np.array([0.3])`                                          |
-| 197          | `CoV_phiInp`            | `np.array([0.2])`                                          |
-| 202          | `CoV_uwsInp`            | `np.array([0.0])`                                          |
-| 207          | `CoV_kSatInp`           | `np.array([0.0])`                                          |
-| 212          | `CoV_diffusInp`         | `np.array([0.0])`                                          |
-| 218          | `Dist_cInp`             | `np.array(['LN'])`                                         |
-| 223          | `Dist_phiInp`           | `np.array(['N'])`                                          |
-| 228          | `Dist_uwsInp`           | `np.array(['N'])`                                          |
-| 233          | `Dist_kSatInp`          | `np.array(['LN'])`                                         |
-| 238          | `Dist_diffusInp`        | `np.array(['LN'])`                                         |
-| 247          | `CorrLenX_cInp`         | `np.array([50])`                                           |
-| 252          | `CorrLenY_cInp`         | `np.array([50])`                                           |
-| 257          | `CorrLenX_phiInp`       | `np.array([50])`                                           |
-| 262          | `CorrLenY_phiInp`       | `np.array([50])`                                           |
-| 267-296      | `CorrLenX_uwsInp`<br>`CorrLenY_uwsInp`<br>`CorrLenX_kSatInp`<br>`CorrLenY_kSatInp`<br>`CorrLenX_diffusInp`<br>`CorrLenY_diffusInp` | `np.array(['inf'])` |
-| 380          | `Ella`                  | `100`                                                      |
-| 382          | `Ellb`                  | `20`                                                       |
-| 384          | `Ellc`                  | `2.5`                                                      |
-| 387          | `EllAlpha`              | `0`                                                        |
-| 388          | `EllAlpha_Calc`         | `"No"`                                                     |
-| 390          | `Ellz`                  | `0`                                                        |
-| 398          | `InZone`                | `np.array(([10,107], [20,77]))`                            |
-| 407          | `TimeToAnalyse`         | `np.array((0,86400))`                                      |
-| 413          | `SubDisNum`             | `100`                                                      |
-| 425          | `ProblemName`           | `' '` (Empty space)                                        |
-| 451          | `Multiprocessing_Option`| `Multiprocessing_Option_List[7]` or `"S-MP-MP"`            |
-| 459          | `TOTAL_PROCESSES_IndMC` | `4` (depends on the capacity of the computer)              |
-| 460          | `TOTAL_PROCESSES_EllGen`| `4` (depends on the capacity of the computer)              |
+| 167          | `Mean_phiInp`           | `np.array([32.0])`                                         |
+| 168          | `Mean_uwsInp`           | `np.array([20.0])`                                         |
+| 169          | `Mean_kSatInp`          | `np.array([1.00E-06])`                                     |
+| 170          | `Mean_diffusInp`        | `np.array([5.00E-06])`                                     |
+| 172          | `CoV_cInp`              | `np.array([0.3])`                                          |
+| 173          | `CoV_phiInp`            | `np.array([0.2])`                                          |
+| 174          | `CoV_uwsInp`            | `np.array([0.0])`                                          |
+| 175          | `CoV_kSatInp`           | `np.array([0.0])`                                          |
+| 176          | `CoV_diffusInp`         | `np.array([0.0])`                                          |
+| 178          | `Dist_cInp`             | `np.array(['LN'])`                                         |
+| 179          | `Dist_phiInp`           | `np.array(['N'])`                                          |
+| 180          | `Dist_uwsInp`           | `np.array(['N'])`                                          |
+| 181          | `Dist_kSatInp`          | `np.array(['LN'])`                                         |
+| 182          | `Dist_diffusInp`        | `np.array(['LN'])`                                         |
+| 187          | `CorrLenX_cInp`         | `np.array([50])`                                           |
+| 188          | `CorrLenY_cInp`         | `np.array([50])`                                           |
+| 189          | `CorrLenX_phiInp`       | `np.array([50])`                                           |
+| 190          | `CorrLenY_phiInp`       | `np.array([50])`                                           |
+| 191-196      | `CorrLenX_uwsInp`<br>`CorrLenY_uwsInp`<br>`CorrLenX_kSatInp`<br>`CorrLenY_kSatInp`<br>`CorrLenX_diffusInp`<br>`CorrLenY_diffusInp` | `np.array(['inf'])` |
+| 240          | `Ella`                  | `100`                                                      |
+| 242          | `Ellb`                  | `20`                                                       |
+| 244          | `Ellc`                  | `2.5`                                                      |
+| 247          | `EllAlpha`              | `0`                                                        |
+| 248          | `EllAlpha_Calc`         | `"No"`                                                     |
+| 250          | `Ellz`                  | `0`                                                        |
+| 258          | `InZone`                | `np.array(([10,107], [20,77]))`                            |
+| 267          | `TimeToAnalyse`         | `np.array((0,86400))`                                      |
+| 273          | `SubDisNum`             | `100`                                                      |
+| 285          | `ProblemName`           | `' '` (Empty space)                                        |
+| 311          | `Multiprocessing_Option`| `Multiprocessing_Option_List[7]` or `"S-MP-MP"`            |
+| 319          | `TOTAL_PROCESSES_IndMC` | `4` (depends on the capacity of the computer)              |
+| 320          | `TOTAL_PROCESSES_EllGen`| `4` (depends on the capacity of the computer)              |
 
 ### Additional Notes
 - **Line 121-124 Activation**: The lines `{121-124}` should be activated to run the case study for Kvam Landslides.
